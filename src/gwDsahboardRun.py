@@ -60,7 +60,11 @@ class GeoLFrame(wx.Frame):
         self.gwtitleLb.SetFont(gv.iTitleFont)
         self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
 
-        vbox1.Add(self.gwtitleLb, flag=flagsR, border=2)
+        vbox1.Add(self.gwtitleLb, flag=flagsR, border=2)    
+        vbox1.AddSpacer(5)
+        vbox1.Add(self._buildGatewaySizer(), flag=flagsR, border=2)
+
+        vbox1.AddSpacer(5)
 
         self.chartPanel = gp.ChartDisplayPanel(self)
 
@@ -108,6 +112,60 @@ class GeoLFrame(wx.Frame):
         bsizer2.Add(self.updateTLb, flag=flagsR, border=2)
         hSizer.Add(bsizer2, flag=flagsR, border=2)
         return hSizer
+
+    def _buildGatewaySizer(self):
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        hSizer = wx.BoxSizer(wx.HORIZONTAL)
+        box1 = wx.StaticBox(self, -1, label="DashBoard Own Information", size= (550, 300))
+        bsizer1 = wx.StaticBoxSizer(box1, wx.VERTICAL)
+        self.gwIPLb = wx.StaticText(self, label="Gateway address:")
+        self.gwIPLb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer1.Add(self.gwIPLb, flag=flagsR, border=2)
+        bsizer1.AddSpacer(5)
+
+        self.gwMacLb = wx.StaticText(self, label="Own Mode:")
+        self.gwMacLb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer1.Add(self.gwMacLb, flag=flagsR, border=2)
+        
+        bsizer1.AddSpacer(5)
+        
+        self.gwGPSLb = wx.StaticText(self, label="Own GPS Pos: []")
+        self.gwGPSLb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer1.Add(self.gwGPSLb, flag=flagsR, border=2)
+        bsizer1.AddSpacer(5)
+
+        self.gwRptLb = wx.StaticText(self, label="Last Report:")
+        self.gwRptLb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer1.Add(self.gwRptLb, flag=flagsR, border=2)
+        hSizer.Add(bsizer1, flag=flagsR, border=2)
+
+        hSizer.AddSpacer(20)
+
+
+        box2 = wx.StaticBox(self, -1, label="data updated", size= (550, 300))
+
+        bsizer2 = wx.StaticBoxSizer(box2, wx.VERTICAL)
+        self.data0Lb = wx.StaticText(self, label="data0: - ")
+        self.data0Lb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer2.Add(self.data0Lb, flag=flagsR, border=2)
+
+        bsizer2.AddSpacer(5)
+        self.data1Lb = wx.StaticText(self, label="data1: - ")
+        self.data1Lb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer2.Add(self.data1Lb, flag=flagsR, border=2)
+
+        bsizer2.AddSpacer(5)
+        self.data2Lb = wx.StaticText(self, label="data2: - ")
+        self.data2Lb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer2.Add(self.data2Lb, flag=flagsR, border=2)
+
+        bsizer2.AddSpacer(5)
+        self.data3Lb = wx.StaticText(self, label="data3: -")
+        self.data3Lb.SetForegroundColour(wx.Colour(200,200,200))
+        bsizer2.Add(self.data3Lb, flag=flagsR, border=2)
+        hSizer.Add(bsizer2, flag=flagsR, border=2)
+        return hSizer
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
