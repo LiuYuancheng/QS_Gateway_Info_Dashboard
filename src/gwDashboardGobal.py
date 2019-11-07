@@ -11,6 +11,7 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import os
+import wx
 
 dirpath = os.getcwd()
 print("Current working directory is : %s" % dirpath)
@@ -23,6 +24,7 @@ BGIMG_PATH = os.path.join(dirpath, IMG_FD, "background.jpg")
 DC_POS_PATH = os.path.join(dirpath, "awsRecord.txt")
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
+iTitleFont = None
 iCtrlPanel = None   # panel to do the control
 iMapPanel = None    # panel to display the google map.
 iGeoMgr = None      # program control manager.

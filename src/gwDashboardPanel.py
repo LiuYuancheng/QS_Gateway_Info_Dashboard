@@ -11,9 +11,138 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import wx
+import wx.grid
+
 import webbrowser
 from datetime import datetime
-import geoLGobal as gv
+import gwDashboardGobal as gv
+
+class PanelOwnInfo(wx.Panel):
+    """ Own information panel; 
+    """
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        #self.panelSize = panelSize
+        self.SetSizer(self._buidUISizer())
+
+    def _buidUISizer(self):
+        """ Build the panel's main UI Sizer. """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        mSizer = wx.BoxSizer(wx.VERTICAL)
+        self.gwLabel = wx.StaticText(self, label=" Gateway counter [Actived/Connected]:   0/1")
+        self.gwLabel.SetFont(gv.iTitleFont)
+        mSizer.Add(self.gwLabel, flag=flagsR, border=2)
+        mSizer.AddSpacer(5)
+        # Add the client connection grid.
+        collumNum = 6
+        self.grid = wx.grid.Grid(self, -1)
+        self.grid.CreateGrid(10, collumNum)
+        # Set the Grid size.
+        self.grid.SetRowLabelSize(40)
+        self.grid.SetColSize(0, 80)
+        self.grid.SetColSize(1, 120)
+        self.grid.SetColSize(2, 120)
+        self.grid.SetColSize(3, 120)
+        self.grid.SetColSize(4, 120)
+        self.grid.SetColSize(5, 120)
+        # Set the Grid's labels.
+        self.grid.SetColLabelValue(0, 'GateWay ID')
+        self.grid.SetColLabelValue(1, 'GateWay IP_addr')
+        self.grid.SetColLabelValue(2, 'GateWay MAC ')
+        self.grid.SetColLabelValue(3, 'GateWay GPS Pos')
+        self.grid.SetColLabelValue(4, 'Connected Time ')
+        self.grid.SetColLabelValue(5, 'Last Report Time')
+        mSizer.Add(self.grid, flag=flagsR, border=2)
+        return mSizer
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelChart(wx.Panel):
+    """ This function is used to provide lineChart wxPanel to show the history 
+        of the people counting sensor's data.
+        example: http://manwhocodes.blogspot.com/2013/04/graphics-device-interface-in-wxpython.html
+    """
+    def __init__(self, parent, recNum=60):
+        """ Init the panel."""
+        wx.Panel.__init__(self, parent, size=(500, 400))
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        self.recNum = recNum
+        self.updateFlag = True  # flag whether we update the diaplay area
+        # [(current num, average num, final num)]*60
+        self.data = [(0, 0, 0)] * self.recNum
+        self.times = ('-30s', '-25s', '-20s', '-15s', '-10s', '-5s', '0s')
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+
+#--PanelChart--------------------------------------------------------------------
+    def appendData(self, numsList):
+        """ Append the data into the data hist list.
+            numsList Fmt: [(current num, average num, final num)]
+        """
+        self.data.append([min(n, 20)for n in numsList])
+        self.data.pop(0) # remove the first oldest recode in the list.
+    
+#--PanelChart--------------------------------------------------------------------
+    def drawBG(self, dc):
+        """ Draw the line chart background."""
+        dc.SetPen(wx.Pen('WHITE'))
+        dc.DrawRectangle(1, 1, 300, 200)
+        # DrawTitle:
+        font = dc.GetFont()
+        font.SetPointSize(8)
+        dc.SetFont(font)
+        dc.DrawText('XAKA sensor data', 2, 235)
+        # Draw Axis and Grids:(Y-people count X-time)
+        dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
+        dc.DrawLine(1, 1, 300, 1)
+        dc.DrawLine(1, 1, 1, 200)
+        for i in range(2, 22, 2):
+            dc.DrawLine(2, i*10, 300, i*10) # Y-Grid
+            dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
+            dc.DrawText(str(i).zfill(2), -25, i*10+5)  # format to ## int, such as 02
+        for i in range(len(self.times)): 
+            dc.DrawLine(i*50, 2, i*50, 200) # X-Grid
+            dc.DrawLine(i*50, 2, i*50, -5)  # X-Axis
+            dc.DrawText(self.times[i], i*50-10, -5)
+        
+#--PanelChart--------------------------------------------------------------------
+    def drawFG(self, dc):
+        """ Draw the front ground data chart line."""
+        # draw item (Label, color)
+        item = (('Crt_N', '#0AB1FF'), ('Avg_N', '#CE8349'), ('Fnl_N', '#A5CDAA'))
+        for idx in range(3):
+            (label, color) = item[idx]
+            # Draw the line sample.
+            dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
+            dc.DrawText(label, idx*60+115, 220)
+            dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
+            # Create the point list and draw.
+            dc.DrawSpline([(i*5, self.data[i][idx]*10) for i in range(self.recNum)])
+
+#--PanelChart--------------------------------------------------------------------
+    def updateDisplay(self, updateFlag=None):
+        """ Set/Update the display: if called as updateDisplay() the function will 
+            update the panel, if called as updateDisplay(updateFlag=?) the function 
+            will set the self update flag.
+        """
+        if updateFlag is None and self.updateFlag: 
+            self.Refresh(True)
+            self.Update()
+        else:
+            self.updateFlag = updateFlag
+
+#--PanelChart--------------------------------------------------------------------
+    def OnPaint(self, event):
+        """ Main panel drawing function."""
+        dc = wx.PaintDC(self)
+        # set the axis orientation area and fmt to up + right direction.
+        dc.SetDeviceOrigin(40, 240)
+        dc.SetAxisOrientation(True, True)
+        self.drawBG(dc)
+        self.drawFG(dc)
+
+
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
