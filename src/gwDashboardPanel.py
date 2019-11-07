@@ -157,7 +157,7 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
     #----------------------------------------------------------------------
     def __init__(self, parent):
         """Constructor"""
-        sc.SizedScrolledPanel.__init__(self, parent, size=(1200, 700))
+        sc.SizedScrolledPanel.__init__(self, parent, size=(1130, 700))
         self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.SetSizer(self._buidUISizer())
 
