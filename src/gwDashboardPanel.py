@@ -12,6 +12,8 @@
 #-----------------------------------------------------------------------------
 import wx
 import wx.grid
+import wx.lib.sized_controls as sc
+
 
 import webbrowser
 from datetime import datetime
@@ -63,10 +65,11 @@ class PanelChart(wx.Panel):
         of the people counting sensor's data.
         example: http://manwhocodes.blogspot.com/2013/04/graphics-device-interface-in-wxpython.html
     """
-    def __init__(self, parent, recNum=60):
+    def __init__(self, parent, recNum=60, pSize=(540, 320)):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(500, 400))
-        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        wx.Panel.__init__(self, parent, size=pSize)
+        self.SetBackgroundColour(wx.Colour(230, 230, 230))
+        self.panelSize = pSize
         self.recNum = recNum
         self.updateFlag = True  # flag whether we update the diaplay area
         # [(current num, average num, final num)]*60
@@ -85,37 +88,42 @@ class PanelChart(wx.Panel):
 #--PanelChart--------------------------------------------------------------------
     def drawBG(self, dc):
         """ Draw the line chart background."""
+        (w, h) = self.panelSize
         dc.SetPen(wx.Pen('WHITE'))
-        dc.DrawRectangle(1, 1, 300, 200)
+        dc.DrawRectangle(1, 1, w-100, h-100)
         # DrawTitle:
         font = dc.GetFont()
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText('XAKA sensor data', 2, 235)
+        dc.DrawText('text data', 2, h-70)
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
-        dc.DrawLine(1, 1, 300, 1)
-        dc.DrawLine(1, 1, 1, 200)
+        dc.DrawLine(1, 1, w-100, 1)
+        dc.DrawLine(1, 1, 1, h-100)
+        offsetY = (h-100)//20
+        
         for i in range(2, 22, 2):
-            dc.DrawLine(2, i*10, 300, i*10) # Y-Grid
-            dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
-            dc.DrawText(str(i).zfill(2), -25, i*10+5)  # format to ## int, such as 02
+            dc.DrawLine(2, i*offsetY, w-100, i*offsetY) # Y-Grid
+            dc.DrawLine(2, i*offsetY, -5, i*offsetY)  # Y-Axis
+            dc.DrawText(str(i).zfill(2), -25, i*offsetY+5)  # format to ## int, such as 02
+        offsetX = (w-100)//len(self.times)
         for i in range(len(self.times)): 
-            dc.DrawLine(i*50, 2, i*50, 200) # X-Grid
-            dc.DrawLine(i*50, 2, i*50, -5)  # X-Axis
-            dc.DrawText(self.times[i], i*50-10, -5)
+            dc.DrawLine(i*offsetX, 2, i*offsetX, h-100) # X-Grid
+            dc.DrawLine(i*offsetX, 2, i*offsetX, -5)  # X-Axis
+            dc.DrawText(self.times[i], i*offsetX-10, -5)
         
 #--PanelChart--------------------------------------------------------------------
     def drawFG(self, dc):
         """ Draw the front ground data chart line."""
         # draw item (Label, color)
-        item = (('Crt_N', '#0AB1FF'), ('Avg_N', '#CE8349'), ('Fnl_N', '#A5CDAA'))
+        (w, h) = self.panelSize
+        item = (('data1', '#0AB1FF'), ('data2', '#CE8349'), ('data3', '#A5CDAA'))
         for idx in range(3):
             (label, color) = item[idx]
             # Draw the line sample.
             dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-            dc.DrawText(label, idx*60+115, 220)
-            dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
+            dc.DrawText(label, idx*60+115, h-80)
+            dc.DrawLine(100+idx*60, h-80, 100+idx*60+8, h-80)
             # Create the point list and draw.
             dc.DrawSpline([(i*5, self.data[i][idx]*10) for i in range(self.recNum)])
 
@@ -136,12 +144,44 @@ class PanelChart(wx.Panel):
         """ Main panel drawing function."""
         dc = wx.PaintDC(self)
         # set the axis orientation area and fmt to up + right direction.
-        dc.SetDeviceOrigin(40, 240)
+        (w, h) = self.panelSize
+        dc.SetDeviceOrigin(40, h-40)
         dc.SetAxisOrientation(True, True)
         self.drawBG(dc)
         self.drawFG(dc)
 
 
+class ChartDisplayPanel(sc.SizedScrolledPanel):
+    """ chart display panel.
+    """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """Constructor"""
+        sc.SizedScrolledPanel.__init__(self, parent, size=(1200, 700))
+        self.SetBackgroundColour(wx.Colour(200, 200, 210))
+        self.SetSizer(self._buidUISizer())
+
+    def _buidUISizer(self):
+        """ Build the panel's main UI Sizer. """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        mSizer = wx.BoxSizer(wx.VERTICAL)
+        mSizer.AddSpacer(10)
+        gs = wx.GridSizer(2, 2, 5, 5)
+        self.downPanel = PanelChart(self)
+        gs.Add(self.downPanel,flag=flagsR, border=2)
+
+        self.uploadPanel = PanelChart(self)
+        gs.Add(self.uploadPanel,flag=flagsR, border=2)
+
+        self.throuthPanel = PanelChart(self)
+        gs.Add(self.throuthPanel,flag=flagsR, border=2)
+
+        self.percetPanel = PanelChart(self)
+        gs.Add(self.percetPanel,flag=flagsR, border=2)
+
+        mSizer.Add(gs, flag=flagsR, border=2)
+        mSizer.AddSpacer(50)
+        return mSizer
 
 
 #-----------------------------------------------------------------------------

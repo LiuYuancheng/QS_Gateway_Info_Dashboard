@@ -55,21 +55,18 @@ class GeoLFrame(wx.Frame):
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
 
-        gs = wx.GridSizer(2, 2, 5, 5)
-        self.downPanel = gp.PanelChart(self)
-        gs.Add(self.downPanel,flag=flagsR, border=2)
+        vbox1 = wx.BoxSizer(wx.VERTICAL)
+        self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
+        self.gwtitleLb.SetFont(gv.iTitleFont)
+        self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
 
-        self.uploadPanel = gp.PanelChart(self)
-        gs.Add(self.uploadPanel,flag=flagsR, border=2)
+        vbox1.Add(self.gwtitleLb, flag=flagsR, border=2)
 
-        self.throuthPanel = gp.PanelChart(self)
-        gs.Add(self.throuthPanel,flag=flagsR, border=2)
+        self.chartPanel = gp.ChartDisplayPanel(self)
 
-        self.percetPanel = gp.PanelChart(self)
-        gs.Add(self.percetPanel,flag=flagsR, border=2)
+        vbox1.Add(self.chartPanel, flag=flagsR, border=2)
 
-        mSizer.Add(gs, flag=flagsR, border=2)
-
+        mSizer.Add(vbox1, flag=flagsR, border=2)
 
 
         return mSizer
