@@ -25,37 +25,39 @@ class PanelOwnInfo(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        #self.panelSize = panelSize
         self.SetSizer(self._buidUISizer())
 
     def _buidUISizer(self):
         """ Build the panel's main UI Sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         mSizer = wx.BoxSizer(wx.VERTICAL)
-        self.gwLabel = wx.StaticText(self, label=" Gateway counter [Actived/Connected]:   0/1")
-        self.gwLabel.SetFont(gv.iTitleFont)
-        mSizer.Add(self.gwLabel, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.gwLabel = wx.StaticText(self, label=" Gateway Counter [Actived/Connected]:   0/1")
+        self.gwLabel.SetFont(gv.iTitleFont)
+        hbox.Add(self.gwLabel, flag=flagsR, border=2)
+        hbox.AddSpacer(100)
+        hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
+        mSizer.Add(hbox, flag=flagsR, border=2)
+        mSizer.AddSpacer(10)
         # Add the client connection grid.
-        collumNum = 6
+        collumNum = 7
         self.grid = wx.grid.Grid(self, -1)
         self.grid.CreateGrid(10, collumNum)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
-        self.grid.SetColSize(0, 80)
-        self.grid.SetColSize(1, 120)
-        self.grid.SetColSize(2, 120)
-        self.grid.SetColSize(3, 120)
-        self.grid.SetColSize(4, 120)
-        self.grid.SetColSize(5, 120)
-        # Set the Grid's labels.
-        self.grid.SetColLabelValue(0, 'GateWay ID')
-        self.grid.SetColLabelValue(1, 'GateWay IP_addr')
-        self.grid.SetColLabelValue(2, 'GateWay MAC ')
-        self.grid.SetColLabelValue(3, 'GateWay GPS Pos')
-        self.grid.SetColLabelValue(4, 'Connected Time ')
-        self.grid.SetColLabelValue(5, 'Last Report Time')
+        lbList = ((20,  ' '),
+                  (80,  'GateWay ID'),
+                  (120, 'GateWay IP_addr'),
+                  (120, 'GateWay MAC'),
+                  (120, 'GateWay GPS Pos'),
+                  (110, 'Login Time'),
+                  (110, 'Last Report Time'))
+        for i, val in enumerate(lbList):
+            self.grid.SetColSize(i, val[0])
+            self.grid.SetColLabelValue(i, val[1])
         mSizer.Add(self.grid, flag=flagsR, border=2)
+        mSizer.AddSpacer(5)
         return mSizer
 
 #-----------------------------------------------------------------------------

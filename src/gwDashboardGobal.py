@@ -19,7 +19,8 @@ APP_NAME = 'GateWay DashBoat'
 
 #------<IMAGES PATH>-------------------------------------------------------------
 IMG_FD = 'img'
-ICO_PATH = os.path.join(dirpath, IMG_FD, "geoIcon.ico")
+ICO_PATH = os.path.join(dirpath, IMG_FD, "gwIcon.ico")
+NWSAM_PATH = os.path.join(dirpath, IMG_FD, "networkSample.png")
 BGIMG_PATH = os.path.join(dirpath, IMG_FD, "background.jpg")
 DC_POS_PATH = os.path.join(dirpath, "awsRecord.txt")
 
