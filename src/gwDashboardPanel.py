@@ -58,6 +58,15 @@ class PanelOwnInfo(wx.Panel):
             self.grid.SetColLabelValue(i, val[1])
         mSizer.Add(self.grid, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox1.Add(wx.StaticText(self, label="Selected GateWay: "), flag=flagsR, border=2)
+        self.selGwlb = wx.StaticText(self, label="GateWay ID[xxx.xxx.xxx.xxx]")
+        hbox1.Add(self.selGwlb, flag=flagsR, border=2)
+        hbox1.AddSpacer(250)
+        self.trackAcBt = wx.Button(self, label='Show the gateway detail data', size=(220, 22))
+        hbox1.Add(self.trackAcBt, flag=flagsR, border=2)
+        mSizer.Add(hbox1, flag=flagsR, border=2)
+
         return mSizer
 
 #-----------------------------------------------------------------------------

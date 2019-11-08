@@ -24,6 +24,10 @@ NWSAM_PATH = os.path.join(dirpath, IMG_FD, "networkSample.png")
 BGIMG_PATH = os.path.join(dirpath, IMG_FD, "background.jpg")
 DC_POS_PATH = os.path.join(dirpath, "awsRecord.txt")
 
+# own UDP port.
+VD_IP = ('0.0.0.0', 11111)      # UDP video stream server IP 
+
+
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iTitleFont = None
 iCtrlPanel = None   # panel to do the control
