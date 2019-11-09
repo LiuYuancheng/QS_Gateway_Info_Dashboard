@@ -1,17 +1,16 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        geoLRun.py
+# Name:        gwDsahboardRun.py
 #
-# Purpose:     This module is used to convert a url to the IP address then 
-#              find the GPS position it and draw it on the google map.
+# Purpose:     This module is used to create a dashboard to show the gateway 
+#              information.
 #
 # Author:      Yuancheng Liu
 #
-# Created:     2019/10/14
+# Created:     2019/11/09
 # Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
 # License:     YC
 #-----------------------------------------------------------------------------
-import os, sys
 import wx
 
 import gwDashboardGobal as gv
@@ -41,40 +40,30 @@ class GeoLFrame(wx.Frame):
         self.titleLb.SetFont(gv.iTitleFont)
         #self.titleLb.SetForegroundColour(wx.Colour(200,200,200))
         vbox0.Add(self.titleLb, flag=flagsR, border=2)
-
         vbox0.AddSpacer(5)
         vbox0.Add(self._buildOwnInfoSizer(), flag=flagsR, border=2)
-
         vbox0.AddSpacer(5)
         self.ownInfoPanel = gp.PanelOwnInfo(self)
         vbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
-
         mSizer.Add(vbox0, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 1060),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
-
         vbox1 = wx.BoxSizer(wx.VERTICAL)
         self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
         self.gwtitleLb.SetFont(gv.iTitleFont)
         #self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
-
         vbox1.Add(self.gwtitleLb, flag=flagsR, border=2)    
         vbox1.AddSpacer(5)
         vbox1.Add(self._buildGatewaySizer(), flag=flagsR, border=2)
-
         vbox1.AddSpacer(5)
-
         self.chartPanel = gp.ChartDisplayPanel(self)
-
         vbox1.Add(self.chartPanel, flag=flagsR, border=2)
-
         mSizer.Add(vbox1, flag=flagsR, border=2)
-
-
         return mSizer
 
+#-----------------------------------------------------------------------------
     def _buildStateInfoBox(self, mainLabel, subLabels, bSize):
         """ Build a static box hold the data the list 
         """

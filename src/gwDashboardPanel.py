@@ -1,9 +1,9 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        TelloPanel.py
+# Name:        gwDashboardPanel.py
 #
 # Purpose:     This module is used to create the control or display panel for
-#              ip geolocation system.
+#              gateway dashboard system.
 # Author:      Yuancheng Liu
 #
 # Created:     2019/10/14
@@ -13,12 +13,12 @@
 import wx
 import wx.grid
 import wx.lib.sized_controls as sc
-
-
-import webbrowser
 from datetime import datetime
+
 import gwDashboardGobal as gv
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class PanelOwnInfo(wx.Panel):
     """ Own information panel; 
     """
@@ -27,6 +27,7 @@ class PanelOwnInfo(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.SetSizer(self._buidUISizer())
 
+#-----------------------------------------------------------------------------
     def _buidUISizer(self):
         """ Build the panel's main UI Sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
@@ -36,7 +37,7 @@ class PanelOwnInfo(wx.Panel):
         self.gwLabel = wx.StaticText(self, label=" Gateway Counter [Actived/Connected]:   0/1")
         self.gwLabel.SetFont(gv.iTitleFont)
         hbox.Add(self.gwLabel, flag=flagsR, border=2)
-        hbox.AddSpacer(100)
+        hbox.AddSpacer(80)
         hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         mSizer.Add(hbox, flag=flagsR, border=2)
         mSizer.AddSpacer(10)
@@ -66,7 +67,6 @@ class PanelOwnInfo(wx.Panel):
         self.trackAcBt = wx.Button(self, label='Show the gateway detail data', size=(220, 22))
         hbox1.Add(self.trackAcBt, flag=flagsR, border=2)
         mSizer.Add(hbox1, flag=flagsR, border=2)
-
         return mSizer
 
 #-----------------------------------------------------------------------------
@@ -85,7 +85,7 @@ class PanelChart(wx.Panel):
         self.updateFlag = True  # flag whether we update the diaplay area
         # [(current num, average num, final num)]*60
         self.data = [(0, 0, 0)] * self.recNum
-        self.times = ('-60s', '-50s', '-40s', '-30s', '-20s', '-10s', '0s')
+        self.times = ('-80', '-70','-60s', '-50s', '-40s', '-30s', '-20s', '-10s', '0s')
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.SetDoubleBuffered(True)
 
@@ -107,7 +107,7 @@ class PanelChart(wx.Panel):
         font = dc.GetFont()
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText('text data', 2, h-70)
+        dc.DrawText('text data', 2, h-40)
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
         dc.DrawLine(1, 1, w-100, 1)
@@ -118,10 +118,10 @@ class PanelChart(wx.Panel):
             dc.DrawLine(2, i*offsetY, w-100, i*offsetY) # Y-Grid
             dc.DrawLine(2, i*offsetY, -5, i*offsetY)  # Y-Axis
             dc.DrawText(str(i).zfill(2), -25, i*offsetY+5)  # format to ## int, such as 02
-        offsetX = (w-100)//len(self.times)
+        offsetX = (w-40)//len(self.times)
+
         for i in range(len(self.times)): 
-            dc.DrawLine(i*offsetX, 2, i*offsetX, h-100) # X-Grid
-            dc.DrawLine(i*offsetX, 2, i*offsetX, -5)  # X-Axis
+            dc.DrawLine(i*offsetX, -5, i*offsetX, h-100) # X-Grid
             dc.DrawText(self.times[i], i*offsetX-10, -5)
         
 #--PanelChart--------------------------------------------------------------------
