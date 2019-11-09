@@ -72,8 +72,8 @@ class PanelOwnInfo(wx.Panel):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
-    """ This function is used to provide lineChart wxPanel to show the history 
-        of the people counting sensor's data.
+    """ This function is used to provide lineChart wxPanel to show the history
+        data. 
         example: http://manwhocodes.blogspot.com/2013/04/graphics-device-interface-in-wxpython.html
     """
     def __init__(self, parent, recNum=60, pSize=(540, 320)):
@@ -85,8 +85,9 @@ class PanelChart(wx.Panel):
         self.updateFlag = True  # flag whether we update the diaplay area
         # [(current num, average num, final num)]*60
         self.data = [(0, 0, 0)] * self.recNum
-        self.times = ('-30s', '-25s', '-20s', '-15s', '-10s', '-5s', '0s')
+        self.times = ('-60s', '-50s', '-40s', '-30s', '-20s', '-10s', '0s')
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.SetDoubleBuffered(True)
 
 #--PanelChart--------------------------------------------------------------------
     def appendData(self, numsList):
@@ -101,7 +102,7 @@ class PanelChart(wx.Panel):
         """ Draw the line chart background."""
         (w, h) = self.panelSize
         dc.SetPen(wx.Pen('WHITE'))
-        dc.DrawRectangle(1, 1, w-100, h-100)
+        dc.DrawRectangle(1, 1, w-80, h-80)
         # DrawTitle:
         font = dc.GetFont()
         font.SetPointSize(8)
