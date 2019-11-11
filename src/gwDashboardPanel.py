@@ -32,7 +32,6 @@ class PanelOwnInfo(wx.Panel):
         """ Build the panel's main UI Sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         mSizer = wx.BoxSizer(wx.VERTICAL)
-        mSizer.AddSpacer(5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.gwLabel = wx.StaticText(self, label=" Gateway Counter [Actived/Connected]:   0/1")
         self.gwLabel.SetFont(gv.iTitleFont)
@@ -40,11 +39,11 @@ class PanelOwnInfo(wx.Panel):
         hbox.AddSpacer(80)
         hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         mSizer.Add(hbox, flag=flagsR, border=2)
-        mSizer.AddSpacer(10)
+        mSizer.AddSpacer(5)
         # Add the client connection grid.
         collumNum = 7
         self.grid = wx.grid.Grid(self, -1)
-        self.grid.CreateGrid(10, collumNum)
+        self.grid.CreateGrid(8, collumNum)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
         lbList = ((20,  ' '),
@@ -169,7 +168,7 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
     #----------------------------------------------------------------------
     def __init__(self, parent):
         """Constructor"""
-        sc.SizedScrolledPanel.__init__(self, parent, size=(1130, 700))
+        sc.SizedScrolledPanel.__init__(self, parent, size=(1110, 700))
         self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.SetSizer(self._buidUISizer())
 
