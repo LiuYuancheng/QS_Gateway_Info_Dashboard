@@ -216,6 +216,16 @@ class gwDsahboardFrame(wx.Frame):
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
 
+    def updateGateWayInfo(self):
+        dataDict = gv.iDataMgr.getDataDict()
+        dataSet = dataDict[gv.iSelectedGW]
+        ipStr = dataSet['IpMac'][0]
+        macStr = dataSet['IpMac'][1]
+        gpsStr = dataSet['GPS']
+        rpStr = dataSet['ReportT']
+        for k, label in enumerate((ipStr, macStr, gpsStr, rpStr)):
+            self.gwInfoLbs[k].SetLabel(str(label))
+
     def onClose(self, event):
         """ Stop all the thread and close the UI."""
         self.speedTestServ.stop()

@@ -26,6 +26,7 @@ class PanelOwnInfo(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.gatewayId = ''
         self.SetSizer(self._buidUISizer())
 
 #-----------------------------------------------------------------------------
@@ -66,6 +67,7 @@ class PanelOwnInfo(wx.Panel):
         hbox1.Add(self.selGwlb, flag=flagsR, border=2)
         hbox1.AddSpacer(250)
         self.trackAcBt = wx.Button(self, label='Show the gateway detail data', size=(220, 22))
+        self.trackAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
         hbox1.Add(self.trackAcBt, flag=flagsR, border=2)
         mSizer.Add(hbox1, flag=flagsR, border=2)
         return mSizer
@@ -89,7 +91,11 @@ class PanelOwnInfo(wx.Panel):
             dataIp = self.grid.GetCellValue(row_index, 2)
             if dataId:
                 self.selGwlb.SetLabel(dataId+' [ '+dataIp+' ]')
-            gv.iSelectedGW = dataId
+            self.gatewayId = dataId
+
+    def onShowGw(self, event):
+        gv.iSelectedGW =self.gatewayId
+        gv.iMainFrame.updateGateWayInfo()
 
     def updateGrid(self):
         """ update the grid data."""
@@ -133,7 +139,7 @@ class PanelChart(wx.Panel):
     def setChartCmt(self, title, yLaber, lColor):
         self.title = title
         self.yLabel = yLaber
-        self.lColor = yLaber
+        self.lColor = lColor
 
 
 #--PanelChart--------------------------------------------------------------------
@@ -154,11 +160,15 @@ class PanelChart(wx.Panel):
         font = dc.GetFont()
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText('text data', 2, h-40)
+        dc.DrawText(self.title, 2, h-40)
+
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
         dc.DrawLine(1, 1, w-100, 1)
         dc.DrawLine(1, 1, 1, h-100)
+        dc.DrawText('time', w-90, 10)
+        dc.DrawText(self.yLabel, -35, h-60)
+
         offsetY = (h-100)//20
         
         for i in range(2, 22, 2):
@@ -178,10 +188,10 @@ class PanelChart(wx.Panel):
         (w, h) = self.panelSize
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText(label, 115, h-80)
+        dc.DrawText('data:'+str(self.data[-1]), w-150, h-80)
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
         gdc = wx.GCDC(dc)
-        self.lColor = (82, 153, 85)
+        #self.lColor = (82, 153, 85)
         (r, g, b),  alph = self.lColor, 128 # half transparent alph
         gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
         delta = (w-100)//20
@@ -240,17 +250,18 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         gs = wx.GridSizer(2, 2, 5, 5)
         self.downPanel = PanelChart(self)
         gs.Add(self.downPanel,flag=flagsR, border=2)
-
+        self.downPanel.setChartCmt('Gateway DownLoad Speed', 'Mbps',(200, 0, 0))
         self.uploadPanel = PanelChart(self)
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
-
+        self.uploadPanel.setChartCmt('Gateway Upload Speed', 'Mbps',(82, 153, 85))
         self.throuthPanel = PanelChart(self)
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
-
+        self.throuthPanel.setChartCmt('Through Put Speed', 'Mbps',(0, 0, 200))
         self.percetPanel = PanelChart(self)
         gs.Add(self.percetPanel,flag=flagsR, border=2)
-
+        self.percetPanel.setChartCmt('Package Lose Rate', '%', (120, 120, 120))
         mSizer.Add(gs, flag=flagsR, border=2)
+
         mSizer.AddSpacer(50)
         return mSizer
 
