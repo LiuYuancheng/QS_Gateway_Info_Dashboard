@@ -11,6 +11,7 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import wx
+import time
 import wx.grid
 import wx.lib.sized_controls as sc
 from datetime import datetime
@@ -67,6 +68,30 @@ class PanelOwnInfo(wx.Panel):
         hbox1.Add(self.trackAcBt, flag=flagsR, border=2)
         mSizer.Add(hbox1, flag=flagsR, border=2)
         return mSizer
+
+    def addToGrid(self, dataID, dataDict):
+        #print(dataDict)
+        rowIdx = dataDict['Idx']
+        self.grid.SetCellValue(rowIdx, 1, dataID)
+        self.grid.SetCellValue(rowIdx, 2, str(dataDict['IpMac'][0]))
+        self.grid.SetCellValue(rowIdx, 3, str(dataDict['IpMac'][1]))
+        self.grid.SetCellValue(rowIdx, 4, str(dataDict['GPS']))
+        self.grid.SetCellValue(rowIdx, 5, str(dataDict['LoginT']))
+        self.grid.SetCellValue(rowIdx, 6, str(dataDict['ReportT']))
+        self.grid.Refresh(True)
+
+    def updateGrid(self):
+        """ update the grid data."""
+        dataMgr = gv.iDataMgr.getDataDict()
+        for key in dataMgr.keys():
+            idx = dataMgr[key]['Idx']
+            rpTime = dataMgr[key]['ReportT']
+            if time.time() - rpTime > 10:
+                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
+            else:
+                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('GREEN'))
+
+            self.grid.SetCellValue(idx, 6, str(rpTime))
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

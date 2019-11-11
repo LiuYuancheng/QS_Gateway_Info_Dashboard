@@ -13,6 +13,8 @@
 #-----------------------------------------------------------------------------
 import wx
 import time
+import random
+
 from datetime import datetime
 import threading
 import speedtest
@@ -36,14 +38,14 @@ class gwDsahboardFrame(wx.Frame):
 
         self.speedTestServ = ownSpeedTest(0, "Own Speed test", 1)
         self.speedTestServ.start()
-
+        gv.iDataMgr = GWDataMgr(self)
 
         self.SetSizer(self._buidUISizer())
         # Set the periodic callback.
-        #self.lastPeriodicTime = time.time()
-        #self.timer = wx.Timer(self)
-        #self.Bind(wx.EVT_TIMER, self.periodic)
-        #self.timer.Start(PERIODIC)  # every 100 ms
+        self.lastPeriodicTime = time.time()
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.periodic)
+        self.timer.Start(PERIODIC)  # every 100 ms
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.SetDoubleBuffered(True)
 
@@ -61,7 +63,7 @@ class gwDsahboardFrame(wx.Frame):
         hbox0.AddSpacer(5)
 
 
-        self.ownInfoPanel = gp.PanelOwnInfo(self)
+        gv.iCtrlPanel = self.ownInfoPanel = gp.PanelOwnInfo(self)
         hbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
         mSizer.Add(hbox0, flag=flagsR, border=2)
 
@@ -189,19 +191,68 @@ class gwDsahboardFrame(wx.Frame):
         bsizer1.AddSpacer(5)
         return hSizer
 
+    #--<telloFrame>----------------------------------------------------------------www
+    def periodic(self, event):
+        """ Periodic call back to handle all the functions."""
+        now = time.time()
+        if now - self.lastPeriodicTime >= 3:
+            self.ownInfoPanel.updateGrid()
+            self.lastPeriodicTime = now
+
+
     def updateOwnInfo(self, dataKey, args):
         if dataKey == 0:
             for k, label in enumerate(self.ownInfoLbs):
                 label.SetLabel(args[k])
+            if not gv.iMasterMode:
+                gv.iDataMgr.addNewGW(gv.iOwnID, args[0], '8C-EC-4B-C2-71-48', args[2])
+
         elif dataKey == 1:
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
+            if not gv.iMasterMode:
+                gv.iDataMgr.updateData(gv.iOwnID,(args[0], args[1], random.randint(1,20), random.randint(1,20)) )
 
     def onClose(self, event):
         """ Stop all the thread and close the UI."""
         self.speedTestServ.stop()
         self.Destroy()
 
+#class dataMgr(object):
+class GWDataMgr(object):
+    """ Interface to store the PLC information and control the PLC through 
+        by hooking to the ModBus(TCPIP).
+    """
+    def __init__(self, parent):
+        self.dataDict = {}
+        self.gwCount = 0 
+
+
+    def getDataDict(self):
+        return self.dataDict
+
+    def addNewGW(self, gwID, ipStr, macStr, GPSlist):
+        dataVal = {
+            'Idx': self.gwCount, 
+            'IpMac': (ipStr, macStr),
+            'GPS': GPSlist,
+            'LoginT': datetime.now().strftime("%H:%M:%S"),
+            'ReportT': time.time(),
+            'Data':[list(),list(),list(),list()],
+        }
+        self.dataDict[gwID] = dataVal
+        self.gwCount += 1
+        gv.iCtrlPanel.addToGrid(gwID, dataVal)
+
+
+    def updateData(self, gwID, dataList):
+        if gwID in self.dataDict.keys():
+            
+            self.dataDict[gwID]['ReportT'] = time.time()
+            popF = len(self.dataDict[gwID]['Data'][0]) > 20
+            for k, dataSet in enumerate(self.dataDict[gwID]['Data']):
+                if popF: dataSet.pop(0)
+                dataSet.append(dataList[k])
 
 class ownSpeedTest(threading.Thread):
     """ Thread to test the own speed.""" 
@@ -239,18 +290,12 @@ class ownSpeedTest(threading.Thread):
             lantency = str(results_dict['ping'])+'ms'
             timeStr = datetime.now().strftime("%H:%M:%S")
             gv.iMainFrame.updateOwnInfo(1,(downloadS, uploadSpeed, lantency, timeStr))
-            time.sleep(25) # main video more smoth
+            time.sleep(5) # main video more smoth
             print(results_dict)      
         print('Tello video server terminated.')
 
     def stop(self):
         self.terminate = True
-
-
-
-
-
-
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
