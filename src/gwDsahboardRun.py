@@ -31,8 +31,8 @@ class gwDsahboardFrame(wx.Frame):
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, id, title, size=(1120, 1040))
-        #self.SetBackgroundColour(wx.Colour(18, 86, 133))
-        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        self.SetBackgroundColour(wx.Colour(18, 86, 133))
+        #self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
 
@@ -74,7 +74,7 @@ class gwDsahboardFrame(wx.Frame):
 
         self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
         self.gwtitleLb.SetFont(gv.iTitleFont)
-        #self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
+        self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
         mSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         mSizer.Add(self._buildGatewaySizer(wx.HORIZONTAL), flag=flagsR, border=2)
@@ -104,7 +104,7 @@ class gwDsahboardFrame(wx.Frame):
         vbox1 = wx.BoxSizer(wx.VERTICAL)
         self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
         self.gwtitleLb.SetFont(gv.iTitleFont)
-        #self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
+        self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
         vbox1.Add(self.gwtitleLb, flag=flagsR, border=2)    
         vbox1.AddSpacer(5)
         vbox1.Add(self._buildGatewaySizer(wx.HORIZONTAL), flag=flagsR, border=2)
@@ -124,8 +124,11 @@ class gwDsahboardFrame(wx.Frame):
         gs = wx.GridSizer(len(subLabels), 2, 5, 5) if layout == wx.VERTICAL else wx.GridSizer(1, len(subLabels)*2, 5, 5)
         valueLblist = []
         for val in subLabels:
-            gs.Add(wx.StaticText(self, label=val), flag=flagsR, border=2)
+            titleLb = wx.StaticText(self, label=val)
+            gs.Add(titleLb, flag=flagsR, border=2)
+            titleLb.SetForegroundColour(wx.Colour(200,200,200))
             dataLb = wx.StaticText(self, label=' -- ')
+            dataLb.SetForegroundColour(wx.Colour(200,200,200))
             valueLblist.append(dataLb)
             gs.Add(dataLb, flag=flagsR, border=2)
         bsizer.Add(gs, flag=flagsR, border=2)
@@ -139,7 +142,7 @@ class gwDsahboardFrame(wx.Frame):
         
         self.titleLb = wx.StaticText(self, label="DashBoad Server Information")
         self.titleLb.SetFont(gv.iTitleFont)
-        #self.titleLb.SetForegroundColour(wx.Colour(200,200,200))
+        self.titleLb.SetForegroundColour(wx.Colour(200,200,200))
         hSizer.Add(self.titleLb, flag=flagsR, border=2)
         hSizer.AddSpacer(10)
         ownILbs =(' IP Address:', ' Running Mode:', ' GPS Position:', ' ISP Information:')
