@@ -12,7 +12,10 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import wx
+import time
+from datetime import datetime
 import threading
+import speedtest
 
 import gwDashboardGobal as gv
 import gwDashboardPanel as gp
@@ -25,18 +28,23 @@ class gwDsahboardFrame(wx.Frame):
     """ URL/IP gps position finder main UI frame."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(1120, 1060))
+        wx.Frame.__init__(self, parent, id, title, size=(1120, 1040))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
+
+        self.speedTestServ = ownSpeedTest(0, "Own Speed test", 1)
+        self.speedTestServ.start()
+
+
         self.SetSizer(self._buidUISizer())
         # Set the periodic callback.
-        self.lastPeriodicTime = time.time()
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.periodic)
-        self.timer.Start(PERIODIC)  # every 100 ms
-
+        #self.lastPeriodicTime = time.time()
+        #self.timer = wx.Timer(self)
+        #self.Bind(wx.EVT_TIMER, self.periodic)
+        #self.timer.Start(PERIODIC)  # every 100 ms
+        self.Bind(wx.EVT_CLOSE, self.onClose)
         self.SetDoubleBuffered(True)
 
 
@@ -48,12 +56,17 @@ class gwDsahboardFrame(wx.Frame):
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.Add(self._buildOwnInfoSizer(wx.VERTICAL), flag=flagsR, border=2)
         hbox0.AddSpacer(5)
+        hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 245),
+                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
+        hbox0.AddSpacer(5)
+
+
         self.ownInfoPanel = gp.PanelOwnInfo(self)
         hbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
         mSizer.Add(hbox0, flag=flagsR, border=2)
 
         mSizer.AddSpacer(5)
-        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(900, -1),
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1100, -1),
                                  style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
 
@@ -127,14 +140,12 @@ class gwDsahboardFrame(wx.Frame):
         #self.titleLb.SetForegroundColour(wx.Colour(200,200,200))
         hSizer.Add(self.titleLb, flag=flagsR, border=2)
         hSizer.AddSpacer(10)
-
-
         ownILbs =(' IP Address:', ' Running Mode:', ' GPS Position:', ' ISP Information:')
-        bsizer1, self.ownInfoLbs = self._buildStateInfoBox(wx.VERTICAL, "DashBoard Own Information", ownILbs, (350, 300))
+        bsizer1, self.ownInfoLbs = self._buildStateInfoBox(wx.VERTICAL, "DashBoard Own Information", ownILbs, (340, 300))
         hSizer.Add(bsizer1, flag=flagsR, border=2)
         hSizer.AddSpacer(5)
         netwLbs = (' DownLoad Speed [Mbps]:', ' Upload Speed [Mbps]:', ' Network Latency [ms]', ' Last Update Time:')
-        bsizer2, self.networkLbs = self._buildStateInfoBox(wx.VERTICAL, "Host Network Information", netwLbs, (350, 300))
+        bsizer2, self.networkLbs = self._buildStateInfoBox(wx.VERTICAL, "Host Network Information", netwLbs, (340, 300))
         hSizer.Add(bsizer2, flag=flagsR, border=2)
         return hSizer
 
@@ -178,7 +189,18 @@ class gwDsahboardFrame(wx.Frame):
         bsizer1.AddSpacer(5)
         return hSizer
 
+    def updateOwnInfo(self, dataKey, args):
+        if dataKey == 0:
+            for k, label in enumerate(self.ownInfoLbs):
+                label.SetLabel(args[k])
+        elif dataKey == 1:
+            for k, label in enumerate(self.networkLbs):
+                label.SetLabel(args[k])
 
+    def onClose(self, event):
+        """ Stop all the thread and close the UI."""
+        self.speedTestServ.stop()
+        self.Destroy()
 
 
 class ownSpeedTest(threading.Thread):
@@ -186,6 +208,46 @@ class ownSpeedTest(threading.Thread):
     def __init__(self, threadID, name, counter):
         threading.Thread.__init__(self)
         self.terminate = False
+        servers = []
+        self.counter = counter
+        self.testServ = speedtest.Speedtest()
+        self.testServ.get_servers(servers)
+        self.testServ.get_best_server()
+        print("Speed test server connected")
+
+    def run(self):
+        """ Main loop to handle the data feed back."""
+        while not self.terminate:
+            time.sleep(3) # main video more smoth
+            threads = None
+            self.testServ.download(threads=threads)
+            self.testServ.upload(threads=threads)
+            self.testServ.results.share()
+            results_dict = self.testServ.results.dict()
+            if self.terminate: break
+            if gv.iMainFrame and self.counter > 0:
+                ownInfo = results_dict['client']
+                ip = ownInfo['ip']
+                mode = 'MasterMode :'+str(gv.VD_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.VD_IP[1])
+                gps = [ownInfo['lat'], ownInfo['lon']]
+                isp = ownInfo['isp']
+                gv.iMainFrame.updateOwnInfo(0,(ip, mode, str(gps), isp))
+                self.counter -= 1
+
+            downloadS = str(results_dict['download'] //1000000) + 'Mbps'
+            uploadSpeed = str(results_dict['upload'] //1000000) + 'Mbps'
+            lantency = str(results_dict['ping'])+'ms'
+            timeStr = datetime.now().strftime("%H:%M:%S")
+            gv.iMainFrame.updateOwnInfo(1,(downloadS, uploadSpeed, lantency, timeStr))
+            time.sleep(25) # main video more smoth
+            print(results_dict)      
+        print('Tello video server terminated.')
+
+    def stop(self):
+        self.terminate = True
+
+
+
 
 
 
@@ -194,8 +256,8 @@ class ownSpeedTest(threading.Thread):
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
     def OnInit(self):
-        mainFrame = gwDsahboardFrame(None, -1, gv.APP_NAME)
-        mainFrame.Show(True)
+        gv.iMainFrame = gwDsahboardFrame(None, -1, gv.APP_NAME)
+        gv.iMainFrame.Show(True)
         return True
 
 app = MyApp(0)
