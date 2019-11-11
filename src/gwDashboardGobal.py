@@ -28,6 +28,7 @@ VD_IP = ('0.0.0.0', 5005)      # UDP video stream server IP
 iMainFrame = None
 iDataMgr = None
 iOwnID = 'Own_00'
+iSelectedGW = None  # selected gateway ID
 iTitleFont = None
 iMasterMode = False  # execution mode.
 iCtrlPanel = None   # panel to do the control

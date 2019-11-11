@@ -196,6 +196,11 @@ class gwDsahboardFrame(wx.Frame):
         """ Periodic call back to handle all the functions."""
         now = time.time()
         if now - self.lastPeriodicTime >= 3:
+            gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
+            if gv.iSelectedGW:
+                dataDict = gv.iDataMgr.getDataDict()
+                self.chartPanel.updateData(dataDict[gv.iSelectedGW]['Data'])
+                self.chartPanel.updateDisplay()
             self.ownInfoPanel.updateGrid()
             self.lastPeriodicTime = now
 
@@ -210,8 +215,6 @@ class gwDsahboardFrame(wx.Frame):
         elif dataKey == 1:
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
-            if not gv.iMasterMode:
-                gv.iDataMgr.updateData(gv.iOwnID,(args[0], args[1], random.randint(1,20), random.randint(1,20)) )
 
     def onClose(self, event):
         """ Stop all the thread and close the UI."""
@@ -236,23 +239,22 @@ class GWDataMgr(object):
             'Idx': self.gwCount, 
             'IpMac': (ipStr, macStr),
             'GPS': GPSlist,
-            'LoginT': datetime.now().strftime("%H:%M:%S"),
+            'LoginT': datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT': time.time(),
-            'Data':[list(),list(),list(),list()],
+            'Data':[[0]*20, [0]*20, [0]*20, [0]*20]
         }
         self.dataDict[gwID] = dataVal
         self.gwCount += 1
         gv.iCtrlPanel.addToGrid(gwID, dataVal)
 
-
     def updateData(self, gwID, dataList):
         if gwID in self.dataDict.keys():
-            
             self.dataDict[gwID]['ReportT'] = time.time()
-            popF = len(self.dataDict[gwID]['Data'][0]) > 20
             for k, dataSet in enumerate(self.dataDict[gwID]['Data']):
-                if popF: dataSet.pop(0)
+                dataSet.pop(0)
                 dataSet.append(dataList[k])
+
+            print(self.dataDict[gwID]['Data'])
 
 class ownSpeedTest(threading.Thread):
     """ Thread to test the own speed.""" 

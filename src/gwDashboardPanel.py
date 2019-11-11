@@ -57,6 +57,7 @@ class PanelOwnInfo(wx.Panel):
         for i, val in enumerate(lbList):
             self.grid.SetColSize(i, val[0])
             self.grid.SetColLabelValue(i, val[1])
+        self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.onLeftClick)
         mSizer.Add(self.grid, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
@@ -80,6 +81,16 @@ class PanelOwnInfo(wx.Panel):
         self.grid.SetCellValue(rowIdx, 6, str(dataDict['ReportT']))
         self.grid.Refresh(True)
 
+    def onLeftClick(self, event):
+        row_index = event.GetRow()
+        if row_index >= 0:
+            self.grid.SelectRow(row_index)
+            dataId = self.grid.GetCellValue(row_index, 1)
+            dataIp = self.grid.GetCellValue(row_index, 2)
+            if dataId:
+                self.selGwlb.SetLabel(dataId+' [ '+dataIp+' ]')
+            gv.iSelectedGW = dataId
+
     def updateGrid(self):
         """ update the grid data."""
         dataMgr = gv.iDataMgr.getDataDict()
@@ -100,25 +111,37 @@ class PanelChart(wx.Panel):
         data. 
         example: http://manwhocodes.blogspot.com/2013/04/graphics-device-interface-in-wxpython.html
     """
-    def __init__(self, parent, recNum=60, pSize=(540, 320)):
+    def __init__(self, parent, recNum=20, pSize=(540, 320)):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=pSize)
         self.SetBackgroundColour(wx.Colour(230, 230, 230))
+        self.title = ''
+        self.yLabel = ''
+        self.lColor = (82, 153, 85)
         self.panelSize = pSize
         self.recNum = recNum
         self.updateFlag = True  # flag whether we update the diaplay area
         # [(current num, average num, final num)]*60
-        self.data = [(0, 0, 0)] * self.recNum
+        self.data = [0] * self.recNum
         self.times = ('-80', '-70','-60s', '-50s', '-40s', '-30s', '-20s', '-10s', '0s')
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.SetDoubleBuffered(True)
 
+    def setData(self, dataList):
+        self.data = dataList
+
+    def setChartCmt(self, title, yLaber, lColor):
+        self.title = title
+        self.yLabel = yLaber
+        self.lColor = yLaber
+
+
 #--PanelChart--------------------------------------------------------------------
-    def appendData(self, numsList):
+    def appendData(self, number):
         """ Append the data into the data hist list.
             numsList Fmt: [(current num, average num, final num)]
         """
-        self.data.append([min(n, 20)for n in numsList])
+        self.data.append(number)
         self.data.pop(0) # remove the first oldest recode in the list.
     
 #--PanelChart--------------------------------------------------------------------
@@ -153,15 +176,27 @@ class PanelChart(wx.Panel):
         """ Draw the front ground data chart line."""
         # draw item (Label, color)
         (w, h) = self.panelSize
-        item = (('data1', '#0AB1FF'), ('data2', '#CE8349'), ('data3', '#A5CDAA'))
-        for idx in range(3):
-            (label, color) = item[idx]
+        (label, color) = ('data1', '#0AB1FF')
+        dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
+        dc.DrawText(label, 115, h-80)
+        #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
+        gdc = wx.GCDC(dc)
+        self.lColor = (82, 153, 85)
+        (r, g, b),  alph = self.lColor, 128 # half transparent alph
+        gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
+        delta = (w-100)//20
+        poligon =[(-1, 0)]+[(i*delta, self.data[i]*10) for i in range(self.recNum)]+[(w-100, -1)]
+        gdc.DrawPolygon(poligon)
+
+        #item = (('data1', '#0AB1FF'), ('data2', '#CE8349'), ('data3', '#A5CDAA'))
+        #for idx in range(3):
+            #(label, color) = item[idx]
             # Draw the line sample.
-            dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-            dc.DrawText(label, idx*60+115, h-80)
-            dc.DrawLine(100+idx*60, h-80, 100+idx*60+8, h-80)
+            #dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
+            #dc.DrawText(label, idx*60+115, h-80)
+            #dc.DrawLine(100+idx*60, h-80, 100+idx*60+8, h-80)
             # Create the point list and draw.
-            dc.DrawSpline([(i*5, self.data[i][idx]*10) for i in range(self.recNum)])
+            #dc.DrawSpline([(i*5, self.data[i][idx]*10) for i in range(self.recNum)])
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
@@ -219,6 +254,17 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         mSizer.AddSpacer(50)
         return mSizer
 
+    def updateData(self, dataList):
+        self.downPanel.setData(dataList[0])
+        self.uploadPanel.setData(dataList[1])
+        self.throuthPanel.setData(dataList[2])
+        self.percetPanel.setData(dataList[3])
+
+    def updateDisplay(self):
+        self.downPanel.updateDisplay()
+        self.uploadPanel.updateDisplay()
+        self.throuthPanel.updateDisplay()
+        self.percetPanel.updateDisplay()
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
