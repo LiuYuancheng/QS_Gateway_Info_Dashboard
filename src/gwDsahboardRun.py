@@ -14,7 +14,7 @@
 import wx
 import time
 import random
-
+import socket
 from datetime import datetime
 import threading
 import speedtest
@@ -23,6 +23,7 @@ import gwDashboardGobal as gv
 import gwDashboardPanel as gp
 
 PERIODIC = 500  # main thread periodically callback by 10ms.
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -39,6 +40,12 @@ class gwDsahboardFrame(wx.Frame):
         self.speedTestServ = ownSpeedTest(0, "Own Speed test", 1)
         self.speedTestServ.start()
         gv.iDataMgr = GWDataMgr(self)
+
+
+        self.reportServ = GWReportServ(1, "Report server", 1)
+        self.reportServ.start()
+
+
 
         self.SetSizer(self._buidUISizer())
         # Set the periodic callback.
@@ -71,7 +78,6 @@ class gwDsahboardFrame(wx.Frame):
         mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1100, -1),
                                  style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
-
         self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
         self.gwtitleLb.SetFont(gv.iTitleFont)
         self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
@@ -194,6 +200,15 @@ class gwDsahboardFrame(wx.Frame):
         bsizer1.AddSpacer(5)
         return hSizer
 
+    def parseMsg(self, msg):
+        dataList = msg.split(';')
+        tag = dataList[0]
+        if tag == 'L':
+            # handle the login message.
+            gv.iDataMgr.addNewGW(dataList[1], dataList[2], dataList[3], dataList[4])
+        elif tag == 'D':
+            gv.iDataMgr.updateData(dataList[1],[int(i) for i in dataList[2:]])
+
     #--<telloFrame>----------------------------------------------------------------www
     def periodic(self, event):
         """ Periodic call back to handle all the functions."""
@@ -232,6 +247,7 @@ class gwDsahboardFrame(wx.Frame):
     def onClose(self, event):
         """ Stop all the thread and close the UI."""
         self.speedTestServ.stop()
+        self.reportServ.stop()
         self.Destroy()
 
 #class dataMgr(object):
@@ -267,7 +283,7 @@ class GWDataMgr(object):
                 dataSet.pop(0)
                 dataSet.append(dataList[k])
 
-            print(self.dataDict[gwID]['Data'])
+            #print(self.dataDict[gwID]['Data'])
 
 class ownSpeedTest(threading.Thread):
     """ Thread to test the own speed.""" 
@@ -284,7 +300,7 @@ class ownSpeedTest(threading.Thread):
     def run(self):
         """ Main loop to handle the data feed back."""
         while not self.terminate:
-            time.sleep(3) # main video more smoth
+            time.sleep(1) # main video more smoth
             threads = None
             self.testServ.download(threads=threads)
             self.testServ.upload(threads=threads)
@@ -294,7 +310,7 @@ class ownSpeedTest(threading.Thread):
             if gv.iMainFrame and self.counter > 0:
                 ownInfo = results_dict['client']
                 ip = ownInfo['ip']
-                mode = 'MasterMode :'+str(gv.VD_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.VD_IP[1])
+                mode = 'MasterMode :'+str(gv.SE_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.SE_IP[1])
                 gps = [ownInfo['lat'], ownInfo['lon']]
                 isp = ownInfo['isp']
                 gv.iMainFrame.updateOwnInfo(0,(ip, mode, str(gps), isp))
@@ -306,11 +322,43 @@ class ownSpeedTest(threading.Thread):
             timeStr = datetime.now().strftime("%H:%M:%S")
             gv.iMainFrame.updateOwnInfo(1,(downloadS, uploadSpeed, lantency, timeStr))
             time.sleep(5) # main video more smoth
-            print(results_dict)      
+            print(results_dict)
+            if self.counter == 0: return
         print('Tello video server terminated.')
 
     def stop(self):
         self.terminate = True
+
+
+class GWReportServ(threading.Thread):
+    """ Tello state prameters feedback UDP reading server thread.""" 
+    def __init__(self, threadID, name, counter):
+        threading.Thread.__init__(self)
+        self.terminate = False
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind(gv.SE_IP)
+        self.recvMsg = None
+
+    def run(self):
+        """ main loop to handle the data feed back."""
+        while not self.terminate:
+            data, _ = self.sock.recvfrom(2048) 
+            if not data: break
+            if isinstance(data, bytes):
+                self.recvMsg = data.decode(encoding="utf-8")
+                print(self.recvMsg)
+                gv.iMainFrame.parseMsg(self.recvMsg)
+
+        self.sock.close()
+        print('Tello control server terminated')
+
+    def stop(self):
+        """ Send back a None message to terminate the buffer reading waiting part."""
+        self.terminate = True
+        closeClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        closeClient.sendto(b'', ("127.0.0.1", gv.SE_IP[1]))
+        closeClient.close()
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

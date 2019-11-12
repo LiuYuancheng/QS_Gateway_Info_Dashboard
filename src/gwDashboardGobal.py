@@ -22,7 +22,7 @@ ICO_PATH = os.path.join(dirpath, IMG_FD, "gwIcon.ico")
 NWSAM_PATH = os.path.join(dirpath, IMG_FD, "networkSample.png")
 
 # dashboard own UDP server IP address.
-VD_IP = ('0.0.0.0', 5005)      # UDP video stream server IP 
+SE_IP = ('0.0.0.0', 5005)       # Sensor server IP
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFrame = None
