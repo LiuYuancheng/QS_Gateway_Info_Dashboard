@@ -65,7 +65,7 @@ class gwDsahboardFrame(wx.Frame):
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         hbox0.AddSpacer(5)
 
-        gv.iGWTablePanel = self.ownInfoPanel = gp.PanelOwnInfo(self)
+        gv.iGWTablePanel = self.ownInfoPanel = gp.PanelGwInfo(self)
         hbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
         mSizer.Add(hbox0, flag=flagsR, border=2)
 
@@ -155,22 +155,21 @@ class gwDsahboardFrame(wx.Frame):
             dataLb.SetForegroundColour(wx.Colour(200, 200, 200))
             valueLblist.append(dataLb)
             gs.Add(dataLb, flag=flagsR, border=2)
-        bsizer.Add(gs, flag=flagsR, border=2)
+        bsizer.Add(gs, flag=wx.EXPAND, border=2)
         return (bsizer, valueLblist)
 
 #-----------------------------------------------------------------------------
     def parseMsg(self, msg):
-        """ parse the income message.
-        """
+        """ parse the income message(login/data)."""
         dataList = msg.split(';')
         if dataList[0] == 'L':
             # handle the login message.
-            gv.iDataMgr.addNewGW(dataList[1], dataList[2], dataList[3], dataList[4])
+            gv.iDataMgr.addNewGW(dataList[1:])
         elif dataList[0] == 'D':
             # handle the data update message.
             gv.iDataMgr.updateData(dataList[1], [int(i) for i in dataList[2:]])
 
-    #--<telloFrame>----------------------------------------------------------------www
+#-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Periodic call back to handle all the functions."""
         now = time.time()
@@ -183,27 +182,25 @@ class gwDsahboardFrame(wx.Frame):
             self.ownInfoPanel.updateGrid()
             self.lastPeriodicTime = now
 
-
+#-----------------------------------------------------------------------------
     def updateOwnInfo(self, dataKey, args):
         if dataKey == 0:
             for k, label in enumerate(self.ownInfoLbs):
                 label.SetLabel(args[k])
             if not gv.iMasterMode:
-                gv.iDataMgr.addNewGW(gv.iOwnID, args[0], '8C-EC-4B-C2-71-48', args[2])
-
+                gv.iDataMgr.addNewGW( (gv.iOwnID, args[0], 'v1.1', args[2]))
         elif dataKey == 1:
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
 
+#-----------------------------------------------------------------------------
     def updateGateWayInfo(self):
         dataSet = gv.iDataMgr.getDataDict(gv.iSelectedGW)
-        ipStr = dataSet['IpMac'][0]
-        macStr = dataSet['IpMac'][1]
-        gpsStr = dataSet['GPS']
-        rpStr = dataSet['ReportT']
-        for k, label in enumerate((ipStr, macStr, gpsStr, rpStr)):
+        datalist = (dataSet['IpMac'], dataSet['version'], dataSet['GPS'], dataSet['ReportT'])
+        for k, label in enumerate(datalist):
             self.gwInfoLbs[k].SetLabel(str(label))
 
+#-----------------------------------------------------------------------------
     def onClose(self, event):
         """ Stop all the thread and close the UI."""
         self.speedTestServ.stop()
@@ -220,7 +217,7 @@ class gwDsahboardFrame(wx.Frame):
         vbox0.AddSpacer(5)
         vbox0.Add(self._buildOwnInfoSizer(wx.HORIZONTAL), flag=flagsR, border=2)
         vbox0.AddSpacer(5)
-        self.ownInfoPanel = gp.PanelOwnInfo(self)
+        self.ownInfoPanel = gp.PanelGwInfo(self)
         vbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
         mSizer.Add(vbox0, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
@@ -292,13 +289,15 @@ class GWDataMgr(object):
         return None
 
 #-----------------------------------------------------------------------------
-    def addNewGW(self, gwID, ipStr, macStr, GPSlist):
+    def addNewGW(self, dataList):
         """ Add a new gateway in the data dict. """
+        gwID, ipStr, version, gps = dataList
         if gwID in self.dataDict.keys(): return False
         dataVal = {
             'Idx':      self.gwCount, 
-            'IpMac':    (ipStr, macStr),
-            'GPS':      GPSlist,
+            'IpMac':    ipStr,
+            'version':  version, 
+            'GPS':      gps,
             'LoginT':   datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT':  time.time(),
             'Data':     [[0]*self.dataSize[1] for i in range(self.dataSize[0])]

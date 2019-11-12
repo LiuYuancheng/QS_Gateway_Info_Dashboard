@@ -20,9 +20,8 @@ import gwDashboardGobal as gv
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
-class PanelOwnInfo(wx.Panel):
-    """ Own information panel; 
-    """
+class PanelGwInfo(wx.Panel):
+    """ gateway information."""
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
@@ -76,8 +75,8 @@ class PanelOwnInfo(wx.Panel):
         #print(dataDict)
         rowIdx = dataDict['Idx']
         self.grid.SetCellValue(rowIdx, 1, dataID)
-        self.grid.SetCellValue(rowIdx, 2, str(dataDict['IpMac'][0]))
-        self.grid.SetCellValue(rowIdx, 3, str(dataDict['IpMac'][1]))
+        self.grid.SetCellValue(rowIdx, 2, str(dataDict['IpMac']))
+        self.grid.SetCellValue(rowIdx, 3, str(dataDict['version']))
         self.grid.SetCellValue(rowIdx, 4, str(dataDict['GPS']))
         self.grid.SetCellValue(rowIdx, 5, str(dataDict['LoginT']))
         self.grid.SetCellValue(rowIdx, 6, str(dataDict['ReportT']))
@@ -250,18 +249,17 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         gs = wx.GridSizer(2, 2, 5, 5)
         self.downPanel = PanelChart(self)
         gs.Add(self.downPanel,flag=flagsR, border=2)
-        self.downPanel.setChartCmt('Gateway DownLoad Speed', 'Mbps',(200, 0, 0))
+        self.downPanel.setChartCmt('Income Throughput Speed', 'Mbps',(200, 0, 0))
         self.uploadPanel = PanelChart(self)
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
-        self.uploadPanel.setChartCmt('Gateway Upload Speed', 'Mbps',(82, 153, 85))
+        self.uploadPanel.setChartCmt('Outcome Throughput Speed', 'Mbps',(82, 153, 85))
         self.throuthPanel = PanelChart(self)
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
-        self.throuthPanel.setChartCmt('Through Put Speed', 'Mbps',(0, 0, 200))
+        self.throuthPanel.setChartCmt('Income Packet Encryption Pct', 'Mbps',(0, 0, 200))
         self.percetPanel = PanelChart(self)
         gs.Add(self.percetPanel,flag=flagsR, border=2)
-        self.percetPanel.setChartCmt('Package Lose Rate', '%', (120, 120, 120))
+        self.percetPanel.setChartCmt('Outcome Packet Encryption Pct', '%', (120, 120, 120))
         mSizer.Add(gs, flag=flagsR, border=2)
-
         mSizer.AddSpacer(50)
         return mSizer
 
