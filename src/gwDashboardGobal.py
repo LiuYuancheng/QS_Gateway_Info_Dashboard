@@ -31,4 +31,4 @@ iOwnID = 'Own_00'
 iSelectedGW = None  # selected gateway ID
 iTitleFont = None
 iMasterMode = False  # execution mode.
-iCtrlPanel = None   # panel to do the control
+iGWTablePanel = None   # panel to do the control

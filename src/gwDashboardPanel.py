@@ -99,10 +99,9 @@ class PanelOwnInfo(wx.Panel):
 
     def updateGrid(self):
         """ update the grid data."""
-        dataMgr = gv.iDataMgr.getDataDict()
-        for key in dataMgr.keys():
-            idx = dataMgr[key]['Idx']
-            rpTime = dataMgr[key]['ReportT']
+        for (_, item) in gv.iDataMgr.getDataDict('items()'):
+            idx = item['Idx']
+            rpTime = item['ReportT']
             if time.time() - rpTime > 10:
                  self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
             else:
