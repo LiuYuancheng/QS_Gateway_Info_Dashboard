@@ -15,6 +15,7 @@ import wx
 import time
 import random
 import socket
+import json
 import threading
 import speedtest
 from datetime import datetime
@@ -174,7 +175,34 @@ class gwDsahboardFrame(wx.Frame):
         """ Periodic call back to handle all the functions."""
         now = time.time()
         if now - self.lastPeriodicTime >= 3:
-            gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
+            if gv.iSimuMode:
+                x = {  "timestamp": str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")),
+                        "throughput_mbps": random.randint(1,20),
+                        "citpercent_ency": random.randint(1,20)
+                    }
+                y = json.dumps(x)
+                with open('income.json', "a") as fh:
+                    fh.write(y+'\n')
+                with open('outcome.json', "a") as fh:
+                    fh.write(y+'\n')
+                
+                random1 = None
+                random2 = None
+
+                with open('income.json', "r") as fh:
+                    lines = fh.readlines()
+                    line = lines[-1].rstrip()
+                    random1 = json.loads(line)
+
+                with open('outcome.json', "r") as fh:
+                    lines = fh.readlines()
+                    line = lines[-1].rstrip()
+                    random2 = json.loads(line)
+
+                gv.iDataMgr.updateData(gv.iOwnID, [random1["throughput_mbps"], random1["citpercent_ency"], random2["throughput_mbps"], random2["citpercent_ency"]])
+
+
+                #gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
             if gv.iSelectedGW:
                 dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
                 self.chartPanel.updateData(dataDict['Data'])
