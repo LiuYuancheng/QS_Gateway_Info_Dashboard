@@ -25,7 +25,7 @@ class PanelGwInfo(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.gatewayId = ''
+        self.selectedID = ''
         self.SetSizer(self._buidUISizer())
 
 #-----------------------------------------------------------------------------
@@ -33,33 +33,39 @@ class PanelGwInfo(wx.Panel):
         """ Build the panel's main UI Sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         mSizer = wx.BoxSizer(wx.VERTICAL)
+        # Row idx 0: gateway title line.
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.gwLabel = wx.StaticText(self, label=" Gateway Counter [Actived/Connected]:   0/1")
+        self.gwLabel = wx.StaticText(self, label="Reported Gateway Information")
         self.gwLabel.SetFont(gv.iTitleFont)
         hbox.Add(self.gwLabel, flag=flagsR, border=2)
         hbox.AddSpacer(80)
+        self.gwStLb = wx.StaticText(self, label="[Online/Total]: 0/0")
+        hbox.Add(self.gwStLb, flag=wx.ALIGN_BOTTOM, border=2)
+        hbox.AddSpacer(20)
         hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         mSizer.Add(hbox, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
-        # Add the client connection grid.
-        collumNum = 7
+        # Row idx 1: Add the client connection grid.
+        collumNum = 8
         self.grid = wx.grid.Grid(self, -1)
         self.grid.CreateGrid(8, collumNum)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
-        lbList = ((20,  ' '),
-                  (80,  'GateWay ID'),
-                  (120, 'GateWay IP_addr'),
-                  (120, 'GateWay MAC'),
-                  (120, 'GateWay GPS Pos'),
-                  (110, 'Login Time'),
-                  (110, 'Last Report Time'))
+        lbList = ((20,  ' '), # connected indicator.
+                  (80,  'GateWay_ID'),
+                  (100, 'IP_Address'),
+                  (60,  'GW_Ver'),
+                  (80,  'DPDK_Ver'),
+                  (100, 'GPS_Position'),
+                  (120, 'Login_Time'),
+                  (110, 'Last_Report_Time'))
         for i, val in enumerate(lbList):
             self.grid.SetColSize(i, val[0])
             self.grid.SetColLabelValue(i, val[1])
         self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.onLeftClick)
         mSizer.Add(self.grid, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
+        # Row idx 2: Display active.
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         hbox1.Add(wx.StaticText(self, label="Selected GateWay: "), flag=flagsR, border=2)
         self.selGwlb = wx.StaticText(self, label="GateWay ID[xxx.xxx.xxx.xxx]")
@@ -71,49 +77,57 @@ class PanelGwInfo(wx.Panel):
         mSizer.Add(hbox1, flag=flagsR, border=2)
         return mSizer
 
+#-----------------------------------------------------------------------------
     def addToGrid(self, dataID, dataDict):
-        #print(dataDict)
+        """ Add a new data in the grid."""
         rowIdx = dataDict['Idx']
-        self.grid.SetCellValue(rowIdx, 1, dataID)
-        self.grid.SetCellValue(rowIdx, 2, str(dataDict['IpMac']))
-        self.grid.SetCellValue(rowIdx, 3, str(dataDict['version']))
-        self.grid.SetCellValue(rowIdx, 4, str(dataDict['GPS']))
-        self.grid.SetCellValue(rowIdx, 5, str(dataDict['LoginT']))
-        self.grid.SetCellValue(rowIdx, 6, str(dataDict['ReportT']))
+        dataSequence = (str(dataID),
+                        str(dataDict['IpMac']),
+                        str(dataDict['version']),
+                        str(dataDict['pdpkVer']),
+                        str(dataDict['GPS']),
+                        str(dataDict['LoginT']),
+                        str(dataDict['ReportT']))
+        for i in range(1, 8):
+            self.grid.SetCellValue(rowIdx, i, dataSequence[i-1])
         self.grid.Refresh(True)
 
+#-----------------------------------------------------------------------------
     def onLeftClick(self, event):
+        """ Update the gate selection part when user left click the row title.
+        """
         row_index = event.GetRow()
         if row_index >= 0:
-            self.grid.SelectRow(row_index)
+            self.grid.SelectRow(row_index)  # High light the row.
             dataId = self.grid.GetCellValue(row_index, 1)
             dataIp = self.grid.GetCellValue(row_index, 2)
-            if dataId:
-                self.selGwlb.SetLabel(dataId+' [ '+dataIp+' ]')
-            self.gatewayId = dataId
+            if dataId: self.selGwlb.SetLabel(dataId+' [ '+dataIp+' ]')
+            self.selectedID = dataId
 
+#-----------------------------------------------------------------------------
     def onShowGw(self, event):
-        gv.iSelectedGW =self.gatewayId
+        gv.iSelectedGW =self.selectedID
         gv.iMainFrame.updateGateWayInfo()
 
+#-----------------------------------------------------------------------------
     def updateGrid(self):
-        """ update the grid data."""
+        """ update the grid report time data and connection indicator."""
         for (_, item) in gv.iDataMgr.getDataDict('items()'):
             idx = item['Idx']
             rpTime = item['ReportT']
-            if time.time() - rpTime > 10:
-                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
+            deltT = time.time() - rpTime
+            if  deltT > 10:
+                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
+            elif 5 < deltT <= 10:
+                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('YELLOW'))
             else:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('GREEN'))
-
-            self.grid.SetCellValue(idx, 6, str(rpTime))
+            self.grid.SetCellValue(idx, 7, str(rpTime))
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
-    """ This function is used to provide lineChart wxPanel to show the history
-        data. 
-        example: http://manwhocodes.blogspot.com/2013/04/graphics-device-interface-in-wxpython.html
+    """ Display chart.
     """
     def __init__(self, parent, recNum=20, pSize=(540, 320)):
         """ Init the panel."""

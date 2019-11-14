@@ -116,7 +116,7 @@ class gwDsahboardFrame(wx.Frame):
                    ' GPS Position :',
                    ' ISP Information :')
         bsizer1, self.ownInfoLbs = self._buildStateInfoBox(
-            wx.VERTICAL, "DashBoard Own Information", ownILbs, (340, 300))
+            wx.VERTICAL, "DashBoard Own Information", ownILbs, (360, 300))
         hSizer.Add(bsizer1, flag=flagsR, border=2)
         hSizer.AddSpacer(5)
         netwLbs = (' DownLoad Speed [Mbps] :',
@@ -124,7 +124,7 @@ class gwDsahboardFrame(wx.Frame):
                    ' Network Latency [ms] :',
                    ' Last Update Time :')
         bsizer2, self.networkLbs = self._buildStateInfoBox(
-            wx.VERTICAL, "Host Network Information", netwLbs, (340, 300))
+            wx.VERTICAL, "Host Network Information", netwLbs, (360, 300))
         hSizer.Add(bsizer2, flag=flagsR, border=2)
         return hSizer
 
@@ -184,6 +184,9 @@ class gwDsahboardFrame(wx.Frame):
 
 #-----------------------------------------------------------------------------
     def updateOwnInfo(self, dataKey, args):
+        """ Update the server information. 
+            > dataKey: 0-Update server infomation 1-update network information.  
+        """
         if dataKey == 0:
             for k, label in enumerate(self.ownInfoLbs):
                 label.SetLabel(args[k])
@@ -266,7 +269,6 @@ class gwDsahboardFrame(wx.Frame):
         bsizer1.AddSpacer(5)
         return hSizer
 
-
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class GWDataMgr(object):
@@ -296,7 +298,8 @@ class GWDataMgr(object):
         dataVal = {
             'Idx':      self.gwCount, 
             'IpMac':    ipStr,
-            'version':  version, 
+            'version':  version,
+            'pdpkVer':  '19.08',
             'GPS':      gps,
             'LoginT':   datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT':  time.time(),
