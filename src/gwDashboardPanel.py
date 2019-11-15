@@ -139,9 +139,8 @@ class PanelChart(wx.Panel):
         self.panelSize = pnlSize
         self.recNum = recNum
         self.updateFlag = True  # flag whether we update the diaplay area
-        # [(current num, average num, final num)]*60
         self.data = [0] * self.recNum
-        self.times = ('-80', '-70', '-60s', '-50s','-40s', '-30s', '-20s', '-10s', '0s')
+        self.times = ('-80', '-70', '-60', '-50','-40', '-30', '-20', '-10', '0')
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.SetDoubleBuffered(True)
 
@@ -210,16 +209,6 @@ class PanelChart(wx.Panel):
         poligon =[(-1, 0)]+[(i*delta, self.data[i]*10) for i in range(self.recNum)]+[(w-100, -1)]
         gdc.DrawPolygon(poligon)
 
-        #item = (('data1', '#0AB1FF'), ('data2', '#CE8349'), ('data3', '#A5CDAA'))
-        #for idx in range(3):
-            #(label, color) = item[idx]
-            # Draw the line sample.
-            #dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-            #dc.DrawText(label, idx*60+115, h-80)
-            #dc.DrawLine(100+idx*60, h-80, 100+idx*60+8, h-80)
-            # Create the point list and draw.
-            #dc.DrawSpline([(i*5, self.data[i][idx]*10) for i in range(self.recNum)])
-
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
         """ Set/Update the display: if called as updateDisplay() the function will 
@@ -237,6 +226,7 @@ class PanelChart(wx.Panel):
         """ Main panel drawing function."""
         dc = wx.PaintDC(self)
         # set the axis orientation area and fmt to up + right direction.
+        # This only work in WIndows.
         (w, h) = self.panelSize
         dc.SetDeviceOrigin(40, h-40)
         dc.SetAxisOrientation(True, True)
@@ -269,7 +259,7 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         self.uploadPanel.setChartCmt('Outcome Throughput Speed', 'Mbps',(82, 153, 85))
         self.throuthPanel = PanelChart(self)
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
-        self.throuthPanel.setChartCmt('Income Packet Encryption Pct', 'Mbps',(0, 0, 200))
+        self.throuthPanel.setChartCmt('Income Packet Encryption Pct', '%',(0, 0, 200))
         self.percetPanel = PanelChart(self)
         gs.Add(self.percetPanel,flag=flagsR, border=2)
         self.percetPanel.setChartCmt('Outcome Packet Encryption Pct', '%', (120, 120, 120))
