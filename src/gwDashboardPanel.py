@@ -129,7 +129,7 @@ class PanelGwInfo(wx.Panel):
 class PanelChart(wx.Panel):
     """ chart to display data based on time.
     """
-    def __init__(self, parent, recNum=20, pnlSize=(540, 320)):
+    def __init__(self, parent, recNum=20, yRange=1 pnlSize=(540, 320)):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=pnlSize)
         self.SetBackgroundColour(wx.Colour(230, 230, 230))
@@ -138,6 +138,7 @@ class PanelChart(wx.Panel):
         self.lColor = (82, 153, 85)
         self.panelSize = pnlSize
         self.recNum = recNum
+        self.yRange = yRange
         self.updateFlag = True  # flag whether we update the diaplay area
         self.data = [0] * self.recNum
         self.times = ('-80', '-70', '-60', '-50','-40', '-30', '-20', '-10', '0')
@@ -165,23 +166,29 @@ class PanelChart(wx.Panel):
     def drawBG(self, dc):
         """ Draw the line chart background."""
         (w, h) = self.panelSize
+        zx, zy = 40, h-40
         dc.SetPen(wx.Pen('WHITE'))
-        dc.DrawRectangle(1, 1, w-80, h-80)
+        dc.DrawRectangle(40, 40, w-80, h-80)
         # DrawTitle:
         font = dc.GetFont()
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText(self.title, 2, h-40)
+        dc.DrawText(self.title, w//2-40, 30)
 
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
-        dc.DrawLine(1, 1, w-100, 1)
-        dc.DrawLine(1, 1, 1, h-100)
-        dc.DrawText('time', w-90, 10)
-        dc.DrawText(self.yLabel, -35, h-60)
+        dc.DrawLine(zx, zy, w-100, zy)
+        dc.DrawLine(zx, zy, zx, 100)
+        dc.DrawText('time[sec]', w-90, zy)
+        dc.DrawText(self.yLabel, 10, 60)
 
-        offsetY = (h-100)//20
+        offsetY = (h-100)//10
         
+        for i in range(10):
+            dc.DrawLine(zx, i*offsetY, w-100, i*offsetY)
+            dc.DrawText(str(i*self.yRange).zfill(2), 15, i*offsetY+5)
+
+
         for i in range(2, 22, 2):
             dc.DrawLine(2, i*offsetY, w-100, i*offsetY) # Y-Grid
             dc.DrawLine(2, i*offsetY, -5, i*offsetY)  # Y-Axis
@@ -227,9 +234,9 @@ class PanelChart(wx.Panel):
         dc = wx.PaintDC(self)
         # set the axis orientation area and fmt to up + right direction.
         # This only work in WIndows.
-        (w, h) = self.panelSize
-        dc.SetDeviceOrigin(40, h-40)
-        dc.SetAxisOrientation(True, True)
+        #(w, h) = self.panelSize
+        #dc.SetDeviceOrigin(40, h-40)
+        #dc.SetAxisOrientation(True, True)
         self.drawBG(dc)
         self.drawFG(dc)
 
