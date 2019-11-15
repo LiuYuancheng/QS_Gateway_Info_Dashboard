@@ -30,7 +30,7 @@ class gwDsahboardFrame(wx.Frame):
     """ gateway dashboard main UI frame."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(1120, 1040))
+        wx.Frame.__init__(self, parent, id, title, size=(1600, 1000))
         gv.iMainFrame = self
         self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
@@ -61,6 +61,7 @@ class gwDsahboardFrame(wx.Frame):
         mSizer = wx.BoxSizer(wx.VERTICAL)
         # Row Idx 1: bashboad server information and gateway table.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox0.AddSpacer(5)
         hbox0.Add(self._buildOwnInfoSizer(wx.VERTICAL), flag=flagsR, border=2)
         hbox0.AddSpacer(5)
         hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 245),
@@ -75,10 +76,12 @@ class gwDsahboardFrame(wx.Frame):
         mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1100, -1),
                                  style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
-        mSizer.Add(self._buildGatewaySizer(), flag=flagsR, border=2)
-        mSizer.AddSpacer(5)
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2.Add(self._buildGatewaySizer(), flag=flagsR, border=2)
+        hbox2.AddSpacer(5)
         self.chartPanel = gp.ChartDisplayPanel(self)
-        mSizer.Add(self.chartPanel, flag=flagsR, border=2)
+        hbox2.Add(self.chartPanel, flag=flagsR, border=2)
+        mSizer.Add(hbox2, flag=flagsR, border=2)
         return mSizer
 
 #-----------------------------------------------------------------------------
@@ -86,19 +89,17 @@ class gwDsahboardFrame(wx.Frame):
         """ Build the gate information sizer."""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vSizer = wx.BoxSizer(wx.VERTICAL)
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
         self.gwtitleLb.SetFont(gv.iTitleFont)
         self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
-        hbox.Add(self.gwtitleLb, flag=flagsR, border=2)
+        vSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
         self.gwHardwareLb = wx.StaticText(self, label="[ Own_00: CPU-Intel(R) Core(TM) i7-8700 @3.2GHz, RAM-8GB ]")
         self.gwHardwareLb.SetForegroundColour(wx.Colour(200,200,200))
-        hbox.AddSpacer(10)
-        hbox.Add(self.gwHardwareLb, flag=wx.ALIGN_BOTTOM, border=2)
-        vSizer.Add(hbox, flag=flagsR, border=2)
+        vSizer.AddSpacer(10)
+        vSizer.Add(self.gwHardwareLb, flag=wx.ALIGN_BOTTOM, border=2)
         vSizer.AddSpacer(5)
         gwILbs =(' IPAddr :', ' Version :',  'GPS_Pos:', ' UpdateTime:', ' DPDK_Info:' ,)
-        bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.HORIZONTAL,"GateWay Information", gwILbs, (1130, 300))
+        bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.VERTICAL,"GateWay Information", gwILbs, (400, 300))
         vSizer.Add(bsizer1, flag=flagsR, border=2)
         return vSizer
 
@@ -108,7 +109,7 @@ class gwDsahboardFrame(wx.Frame):
         """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         hSizer = wx.BoxSizer(layout)
-        self.titleLb = wx.StaticText(self, label="DashBoad Server Information")
+        self.titleLb = wx.StaticText(self, label=" DashBoard Server Information ")
         self.titleLb.SetFont(gv.iTitleFont)
         self.titleLb.SetForegroundColour(wx.Colour(200, 200, 200))
         hSizer.Add(self.titleLb, flag=flagsR, border=2)
@@ -118,7 +119,7 @@ class gwDsahboardFrame(wx.Frame):
                    ' GPS Position :',
                    ' ISP Information :')
         bsizer1, self.ownInfoLbs = self._buildStateInfoBox(
-            wx.VERTICAL, "DashBoard Own Information", ownILbs, (360, 300))
+            wx.VERTICAL, " DashBoard Own Information ", ownILbs, (400, 300))
         hSizer.Add(bsizer1, flag=flagsR, border=2)
         hSizer.AddSpacer(5)
         netwLbs = (' DownLoad Speed [Mbps] :',
@@ -126,7 +127,7 @@ class gwDsahboardFrame(wx.Frame):
                    ' Network Latency [ms] :',
                    ' Last Update Time :')
         bsizer2, self.networkLbs = self._buildStateInfoBox(
-            wx.VERTICAL, "Host Network Information", netwLbs, (360, 300))
+            wx.VERTICAL, " Host Network Information ", netwLbs, (400, 300))
         hSizer.Add(bsizer2, flag=flagsR, border=2)
         return hSizer
 
@@ -149,7 +150,7 @@ class gwDsahboardFrame(wx.Frame):
         valueLblist = []
         for val in subLabels:
             # Data label:
-            titleLb = wx.StaticText(self, label='|%s' %val)
+            titleLb = wx.StaticText(self, label=' %s' %val)
             gs.Add(titleLb, flag=flagsR, border=2)
             titleLb.SetForegroundColour(wx.Colour(200, 200, 200))
             # Data value:
@@ -228,6 +229,9 @@ class gwDsahboardFrame(wx.Frame):
 #-----------------------------------------------------------------------------
     def updateGateWayInfo(self):
         dataSet = gv.iDataMgr.getDataDict(gv.iSelectedGW)
+        print("----")
+        print(dataSet)
+        print("----")
         datalist = (dataSet['IpMac'], dataSet['version'], dataSet['GPS'], dataSet['ReportT'])
         for k, label in enumerate(datalist):
             self.gwInfoLbs[k].SetLabel(str(label))

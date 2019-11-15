@@ -24,7 +24,7 @@ class PanelGwInfo(wx.Panel):
     """ gateway information."""
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.selectedID = ''
         self.SetSizer(self._buidUISizer())
 
@@ -35,28 +35,27 @@ class PanelGwInfo(wx.Panel):
         mSizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx 0: gateway title line.
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.gwLabel = wx.StaticText(self, label="Reported Gateway Information")
+        self.gwLabel = wx.StaticText(self, label=" Deployed Gateway Information")
         self.gwLabel.SetFont(gv.iTitleFont)
         hbox.Add(self.gwLabel, flag=flagsR, border=2)
-        hbox.AddSpacer(80)
-        self.gwStLb = wx.StaticText(self, label="[Online/Total]: 0/0")
-        hbox.Add(self.gwStLb, flag=wx.ALIGN_BOTTOM, border=2)
         hbox.AddSpacer(20)
+        #self.gwStLb = wx.StaticText(self, label="[Online/Total]: 0/0")
+        #hbox.Add(self.gwStLb, flag=wx.ALIGN_BOTTOM, border=2)
+        #hbox.AddSpacer(20)
         hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         mSizer.Add(hbox, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         # Row idx 1: Add the client connection grid.
-        collumNum = 8
+        collumNum = 7
         self.grid = wx.grid.Grid(self, -1)
         self.grid.CreateGrid(8, collumNum)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
-        lbList = ((20,  ' '), # connected indicator.
-                  (80,  'GateWay_ID'),
+        lbList = ((100,  'GateWay_ID'),
                   (100, 'IP_Address'),
-                  (60,  'GW_Ver'),
-                  (80,  'DPDK_Ver'),
-                  (100, 'GPS_Position'),
+                  (100,  'GW_Ver'),
+                  (100,  'DPDK_Ver'),
+                  (120, 'GPS_Position'),
                   (120, 'Login_Time'),
                   (110, 'Last_Report_Time'))
         for i, val in enumerate(lbList):
@@ -88,8 +87,8 @@ class PanelGwInfo(wx.Panel):
                         str(dataDict['GPS']),
                         str(dataDict['LoginT']),
                         str(dataDict['ReportT']))
-        for i in range(1, 8):
-            self.grid.SetCellValue(rowIdx, i, dataSequence[i-1])
+        for i in range(7):
+            self.grid.SetCellValue(rowIdx, i, dataSequence[i])
         self.grid.Refresh(True)
 
 #-----------------------------------------------------------------------------
@@ -99,8 +98,8 @@ class PanelGwInfo(wx.Panel):
         row_index = event.GetRow()
         if row_index >= 0:
             self.grid.SelectRow(row_index)  # High light the row.
-            dataId = self.grid.GetCellValue(row_index, 1)
-            dataIp = self.grid.GetCellValue(row_index, 2)
+            dataId = self.grid.GetCellValue(row_index, 0)
+            dataIp = self.grid.GetCellValue(row_index, 1)
             if dataId: self.selGwlb.SetLabel(dataId+' [ '+dataIp+' ]')
             self.selectedID = dataId
 
@@ -122,14 +121,14 @@ class PanelGwInfo(wx.Panel):
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('YELLOW'))
             else:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('GREEN'))
-            self.grid.SetCellValue(idx, 7, str(rpTime))
+            self.grid.SetCellValue(idx, 6, str(rpTime))
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
     """ chart to display data based on time.
     """
-    def __init__(self, parent, recNum=20, yRange=1 pnlSize=(540, 320)):
+    def __init__(self, parent, recNum=20, axisRng=(10, 1), pnlSize=(540, 320)):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=pnlSize)
         self.SetBackgroundColour(wx.Colour(230, 230, 230))
@@ -138,10 +137,10 @@ class PanelChart(wx.Panel):
         self.lColor = (82, 153, 85)
         self.panelSize = pnlSize
         self.recNum = recNum
-        self.yRange = yRange
+        self.axisRng = axisRng
         self.updateFlag = True  # flag whether we update the diaplay area
         self.data = [0] * self.recNum
-        self.times = ('-80', '-70', '-60', '-50','-40', '-30', '-20', '-10', '0')
+        self.times = [str((i-9)*axisRng[0]) for i in range(10)]
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.SetDoubleBuffered(True)
 
@@ -179,41 +178,37 @@ class PanelChart(wx.Panel):
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
         dc.DrawLine(zx, zy, w-100, zy)
         dc.DrawLine(zx, zy, zx, 100)
-        dc.DrawText('time[sec]', w-90, zy)
-        dc.DrawText(self.yLabel, 10, 60)
+        dc.DrawText('time[sec]', w-70, zy)
+        dc.DrawText(self.yLabel, 10, 20)
 
-        offsetY = (h-100)//10
-        
+        offsetY = (h-80)//10
+        offsetX = (w-80)//10
         for i in range(10):
-            dc.DrawLine(zx, i*offsetY, w-100, i*offsetY)
-            dc.DrawText(str(i*self.yRange).zfill(2), 15, i*offsetY+5)
-
-
-        for i in range(2, 22, 2):
-            dc.DrawLine(2, i*offsetY, w-100, i*offsetY) # Y-Grid
-            dc.DrawLine(2, i*offsetY, -5, i*offsetY)  # Y-Axis
-            dc.DrawText(str(i).zfill(2), -25, i*offsetY+5)  # format to ## int, such as 02
-        offsetX = (w-40)//len(self.times)
-
-        for i in range(len(self.times)): 
-            dc.DrawLine(i*offsetX, -5, i*offsetX, h-100) # X-Grid
-            dc.DrawText(self.times[i], i*offsetX-10, -5)
+            dc.DrawLine(zx, zy-i*offsetY, offsetX*10, zy-i*offsetY)
+            dc.DrawText(str(i*self.axisRng[1]).zfill(2), 18, zy-i*offsetY-7)
+        for i in range(10): 
+            dc.DrawLine(i*offsetX+zx, 40+offsetY, i*offsetX+zx, zy) # X-Grid
+            dc.DrawText(self.times[i], i*offsetX-10+zx, zy+5)
         
 #--PanelChart--------------------------------------------------------------------
     def drawFG(self, dc):
         """ Draw the front ground data chart line."""
         # draw item (Label, color)
         (w, h) = self.panelSize
+
+        offsetY = (h-80)//10
+        offsetX = (w-80)//10
+        zx, zy = 40, h-40
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText('data:'+str(self.data[-1]), w-150, h-80)
+        dc.DrawText('data:'+str(self.data[-1]), w-150, 80)
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
         gdc = wx.GCDC(dc)
         #self.lColor = (82, 153, 85)
         (r, g, b),  alph = self.lColor, 128 # half transparent alph
         gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
-        delta = (w-100)//20
-        poligon =[(-1, 0)]+[(i*delta, self.data[i]*10) for i in range(self.recNum)]+[(w-100, -1)]
+        delta = offsetX*9//self.recNum
+        poligon =[(zx, zy+1)]+[(zx+i*delta, zy-self.data[i]*offsetY) for i in range(self.recNum)]+[(offsetX*10, zy+1)]
         gdc.DrawPolygon(poligon)
 
 #--PanelChart--------------------------------------------------------------------
