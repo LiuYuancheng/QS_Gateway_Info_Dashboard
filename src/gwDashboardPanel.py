@@ -127,21 +127,21 @@ class PanelGwInfo(wx.Panel):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
-    """ Display chart.
+    """ chart to display data based on time.
     """
-    def __init__(self, parent, recNum=20, pSize=(540, 320)):
+    def __init__(self, parent, recNum=20, pnlSize=(540, 320)):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=pSize)
+        wx.Panel.__init__(self, parent, size=pnlSize)
         self.SetBackgroundColour(wx.Colour(230, 230, 230))
-        self.title = ''
+        self.title = ''     
         self.yLabel = ''
         self.lColor = (82, 153, 85)
-        self.panelSize = pSize
+        self.panelSize = pnlSize
         self.recNum = recNum
         self.updateFlag = True  # flag whether we update the diaplay area
         # [(current num, average num, final num)]*60
         self.data = [0] * self.recNum
-        self.times = ('-80', '-70','-60s', '-50s', '-40s', '-30s', '-20s', '-10s', '0s')
+        self.times = ('-80', '-70', '-60s', '-50s','-40s', '-30s', '-20s', '-10s', '0s')
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.SetDoubleBuffered(True)
 
@@ -289,53 +289,6 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         self.throuthPanel.updateDisplay()
         self.percetPanel.updateDisplay()
 
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-class PanelMap(wx.Panel):
-    """ Map panel to show the google map."""
-    def __init__(self, parent, panelSize=(768, 512)):
-        wx.Panel.__init__(self, parent,  size=panelSize)
-        self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.panelSize = panelSize
-        self.bmp = wx.Bitmap(gv.BGIMG_PATH, wx.BITMAP_TYPE_ANY)
-        self.Bind(wx.EVT_PAINT, self.onPaint)
-        self.SetDoubleBuffered(True)
-
-#--PanelMap--------------------------------------------------------------------
-    def onPaint(self, evt):
-        """ Draw the map bitmap and mark the gps position."""
-        dc = wx.PaintDC(self)
-        l, (w, h) = 8, self.panelSize  # set the bm size and the marker size.
-        dc.DrawBitmap(self._scaleBitmap(self.bmp, w, h), 0, 0)
-        dc.SetPen(wx.Pen('RED', width=1, style=wx.PENSTYLE_SOLID))
-        w, h = w//2, h//2
-        dc.DrawLine(w-l, h, w+l, h)
-        dc.DrawLine(w, h-l, w, h+l)
-
-#--PanelMap--------------------------------------------------------------------
-    def _scaleBitmap(self, bitmap, width, height):
-        """ Resize a input bitmap.(bitmap-> image -> resize image -> bitmap)"""
-        #image = wx.ImageFromBitmap(bitmap) # used below 2.7
-        image = bitmap.ConvertToImage()
-        image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
-        #result = wx.BitmapFromImage(image) # used below 2.7
-        result = wx.Bitmap(image, depth=wx.BITMAP_SCREEN_DEPTH)
-        return result
-
-#--PanelMap--------------------------------------------------------------------
-    def updateBitmap(self, bitMap):
-        """ Update the panel bitmap image."""
-        if not bitMap: return
-        self.bmp = bitMap
-
-#--PanelMap--------------------------------------------------------------------
-    def updateDisplay(self, updateFlag=None):
-        """ Set/Update the display: if called as updateDisplay() the function will 
-            update the panel, if called as updateDisplay(updateFlag=?) the function
-            will set the self update flag.
-        """
-        self.Refresh(False)
-        self.Update()
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

@@ -31,20 +31,21 @@ class gwDsahboardFrame(wx.Frame):
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, id, title, size=(1120, 1040))
+        gv.iMainFrame = self
         self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
         # Init the data manager. 
         gv.iDataMgr = GWDataMgr(self, dataSize=(4, 20))
+        # Build the UI.
+        self.SetSizer(self._buidUISizer())
         # Init the own network speed test thread.
         self.speedTestServ = ownSpeedTest(0, "Server SpeedTest", 1)
         self.speedTestServ.start()
         # Init the UDP server.
         self.reportServ = GWReportServ(1, "Report server", 1)
         self.reportServ.start()
-        # Build the UI.
-        self.SetSizer(self._buidUISizer())
         # Set the periodic callback.
         self.lastPeriodicTime = time.time()
         self.timer = wx.Timer(self)
@@ -359,6 +360,19 @@ class ownSpeedTest(threading.Thread):
         self.testServ = speedtest.Speedtest()
         self.testServ.get_servers(servers)
         self.testServ.get_best_server()
+        # Load the simulation information if the 
+        if gv.iSimuMode:
+            ipAddr = '137.132.211.202'
+            mode = 'MasterMode :'+str(gv.SE_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.SE_IP[1])
+            gps = '[1.36672, 103.81]'
+            isp = 'National University of Singapore'
+            gv.iMainFrame.updateOwnInfo(0,(ipAddr, mode, gps, isp))
+            downloadSp = '337.0Mbps'
+            uploadSp = '223.0Mbps'
+            lantency = '28ms'
+            timeStr = datetime.now().strftime("%H:%M:%S")
+            gv.iMainFrame.updateOwnInfo(1,(downloadSp, uploadSp, lantency, timeStr))
+            self.terminate = True # don't run the speed test loop.
         print("Speed test server connected")
 
     def run(self):
@@ -428,8 +442,8 @@ class GWReportServ(threading.Thread):
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
     def OnInit(self):
-        gv.iMainFrame = gwDsahboardFrame(None, -1, gv.APP_NAME)
-        gv.iMainFrame.Show(True)
+        MainFrame = gwDsahboardFrame(None, -1, gv.APP_NAME)
+        MainFrame.Show(True)
         return True
 
 app = MyApp(0)
