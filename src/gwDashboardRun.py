@@ -30,7 +30,7 @@ class gwDsahboardFrame(wx.Frame):
     """ gateway dashboard main UI frame."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(1550, 960))
+        wx.Frame.__init__(self, parent, id, title, size=(1560, 980))
         gv.iMainFrame = self
         self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
@@ -194,7 +194,7 @@ class gwDsahboardFrame(wx.Frame):
         """ Periodic call back to handle all the functions."""
         now = time.time()
         if now - self.lastPeriodicTime >= 3:
-            if gv.iSimuMode:
+            if gv.iSimuMode and gv.iSelectedGW:
                 x = {  "timestamp": str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")),
                         "throughput_mbps": random.randint(1,9),
                         "citpercent_ency": random.randint(1,9)
@@ -273,7 +273,7 @@ class gwDsahboardFrame(wx.Frame):
         if newGwFlag:
             datalist = (gv.iSelectedGW,
                         dataSet['IpMac'],
-                        'Intel(R)Core(TM)i7-8700@3.2GHz',
+                        'Intel(R)i7-8700',
                         '8GB-DDR4 1333Hz',
                         str(datetime.fromtimestamp(int(dataSet['ReportT']))))
             for k, label in enumerate(datalist):
@@ -416,11 +416,11 @@ class ownSpeedTest(threading.Thread):
             ipAddr = '137.132.211.202'
             mode = 'MasterMode :'+str(gv.SE_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.SE_IP[1])
             gps = '[1.36672, 103.81]'
-            isp = 'National University of Singapore'
+            isp = 'NUS'
             gv.iMainFrame.updateOwnInfo(0,(ipAddr, mode, gps, isp))
-            downloadSp = '337.0Mbps'
-            uploadSp = '223.0Mbps'
-            lantency = '28ms'
+            downloadSp =  str(random.randint(200,400))+'.0Mbps'
+            uploadSp = str(random.randint(100,250))+'.0Mbps'
+            lantency = str(10+random.randint(1,20))+'ms'
             timeStr = datetime.now().strftime("%H:%M:%S")
             gv.iMainFrame.updateOwnInfo(1,(downloadSp, uploadSp, lantency, timeStr))
             self.terminate = True # don't run the speed test loop.

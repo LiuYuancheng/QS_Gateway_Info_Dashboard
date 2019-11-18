@@ -232,7 +232,7 @@ class PanelChart(wx.Panel):
         (r, g, b),  alph = self.lColor, 128 # half transparent alph
         gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
         delta = offsetX*9//self.recNum
-        poligon =[(zx, zy+1)]+[(zx+i*delta, zy-self.data[i]*offsetY) for i in range(self.recNum)]+[(offsetX*10, zy+1)]
+        poligon =[(zx, zy+1)]+[(zx+i*delta, int(zy-self.data[i]*offsetY)) for i in range(self.recNum)]+[(offsetX*10, zy+1)]
         gdc.DrawPolygon(poligon)
 
 #--PanelChart--------------------------------------------------------------------
