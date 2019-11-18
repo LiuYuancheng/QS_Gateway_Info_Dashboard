@@ -221,7 +221,7 @@ class gwDsahboardFrame(wx.Frame):
             gv.iDataMgr.addNewGW(dataList[1:])
         elif dataList[0] == 'D':
             # handle the data update message.
-            gv.iDataMgr.updateData(dataList[1], [int(i) for i in dataList[2:]])
+            gv.iDataMgr.updateData(dataList[1], [float(i) for i in dataList[2:]])
 
 #-----------------------------------------------------------------------------
     def periodic(self, event):
@@ -274,10 +274,18 @@ class gwDsahboardFrame(wx.Frame):
             for k, label in enumerate(self.ownInfoLbs):
                 label.SetLabel(args[k])
             if not gv.iMasterMode:
-                gv.iDataMgr.addNewGW( (gv.iOwnID, args[0], 'v1.1', args[2]))
+                with open('gwConfig.json', "r") as fh:
+                    lines = fh.readlines()
+                    line = lines[-1].rstrip()
+                    dataDist = json.loads(line)
+                    gv.iOwnID =  dataDist['gatewayID']
+                gv.iDataMgr.addNewGW( (dataDist['gatewayID'], dataDist['ipAddr'], dataDist['gwVer'], dataDist['dpdk_v'], dataDist['dpdk_c'], dataDist['dpdk_e'], dataDist['keyE'], dataDist['GPS'] ))
         elif dataKey == 1:
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
+
+
+
 
     def appendTlsInfo(self, tlsList):
         self.updateTlsDetail(' New TLS connection:')
@@ -347,14 +355,14 @@ class GWDataMgr(object):
 #-----------------------------------------------------------------------------
     def addNewGW(self, dataList):
         """ Add a new gateway in the data dict. """
-        gwID, ipStr, version, gps = dataList
+        gwID, ipStr, version, dpdk_v, dpdk_c, dpdk_e, keyE,  gps = dataList
         if gwID in self.dataDict.keys(): return False
         dataVal = {
             'Idx':      self.gwCount, 
             'IpMac':    ipStr,
             'version':  version,
-            'pdpkVer':  ('19.08', 'Openssl', 'AES-CBC 256'),
-            'keyExch':  'Custom',
+            'pdpkVer':  (dpdk_v, dpdk_c, dpdk_e),
+            'keyExch':  keyE,
             'GPS':      gps,
             'LoginT':   datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT':  time.time(),

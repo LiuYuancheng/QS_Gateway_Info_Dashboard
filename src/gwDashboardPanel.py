@@ -228,8 +228,8 @@ class PanelChart(wx.Panel):
         zx, zy = 40, h-40
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText('Peak Value: [ %s ]' %str(self.data[-1]), w-100, 5)
-        dc.DrawText('Current Value[ %s ]' %str(self.data[-1]), w-100, 20)
+        dc.DrawText('Peak Value: [ %s ]' %str(self.data[-1]), w-150, 5)
+        dc.DrawText('Current Value[ %s ]' %str(self.data[-1]), w-150, 20)
 
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
         gdc = wx.GCDC(dc)
@@ -285,6 +285,9 @@ class ChartDisplayPanelLinux(wx.Panel):
         itsLb = wx.StaticText(self, label=' Incoming Throughput Speed ')
         itsLb.SetFont(titleFont)
         itsLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        itsLb.Bind(wx.EVT_ENTER_WINDOW, self.onText)
+
+
         gs.Add(itsLb,flag=flagsR, border=2)
         
         otsLb = wx.StaticText(self, label=' Outgoing Throughput Speed ')
@@ -323,6 +326,10 @@ class ChartDisplayPanelLinux(wx.Panel):
         mSizer.AddSpacer(50)
         return mSizer
     
+    def onText(self, event): 
+        print('-')
+
+
     def updateData(self, dataList):
         self.downPanel.setData(dataList[0])
         self.uploadPanel.setData(dataList[1])
