@@ -14,7 +14,7 @@ import os
 
 dirpath = os.getcwd()
 print("Current working directory is : %s" % dirpath)
-APP_NAME = 'Quantum Safe GateWay Dashboard'
+APP_NAME = 'Quantum Safe Gateway Dashboard'
 
 #------<IMAGES PATH>-------------------------------------------------------------
 IMG_FD = 'img'

@@ -30,14 +30,14 @@ class gwDsahboardFrame(wx.Frame):
     """ gateway dashboard main UI frame."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(1600, 1000))
+        wx.Frame.__init__(self, parent, id, title, size=(1550, 960))
         gv.iMainFrame = self
         self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
         # Init the data manager. 
-        gv.iDataMgr = GWDataMgr(self, dataSize=(4, 20))
+        gv.iDataMgr = GWDataMgr(self, dataSize=(4, 80))
         # Build the UI.
         self.SetSizer(self._buidUISizer())
         # Init the own network speed test thread.
@@ -63,6 +63,7 @@ class gwDsahboardFrame(wx.Frame):
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.AddSpacer(5)
         hbox0.Add(self._buildOwnInfoSizer(wx.VERTICAL), flag=flagsR, border=2)
+        # split line
         hbox0.AddSpacer(5)
         hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 245),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
@@ -71,13 +72,18 @@ class gwDsahboardFrame(wx.Frame):
         gv.iGWTablePanel = self.ownInfoPanel = gp.PanelGwInfo(self)
         hbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
         mSizer.Add(hbox0, flag=flagsR, border=2)
-
+        # split line
         mSizer.AddSpacer(5)
-        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1100, -1),
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1530, -1),
                                  style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
+        # Row Idx 1: gateway display area.
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2.AddSpacer(5)
         hbox2.Add(self._buildGatewaySizer(), flag=flagsR, border=2)
+        hbox2.AddSpacer(5)
+        hbox2.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 660),
+                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
         hbox2.AddSpacer(5)
         self.chartPanel = gp.ChartDisplayPanel(self)
         hbox2.Add(self.chartPanel, flag=flagsR, border=2)
@@ -89,18 +95,27 @@ class gwDsahboardFrame(wx.Frame):
         """ Build the gate information sizer."""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vSizer = wx.BoxSizer(wx.VERTICAL)
-        self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
+        self.gwtitleLb = wx.StaticText(self, label=" GateWay Detail Inforamtion ")
         self.gwtitleLb.SetFont(gv.iTitleFont)
         self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
         vSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
-        self.gwHardwareLb = wx.StaticText(self, label="[ Own_00: CPU-Intel(R) Core(TM) i7-8700 @3.2GHz, RAM-8GB ]")
-        self.gwHardwareLb.SetForegroundColour(wx.Colour(200,200,200))
+        #vSizer.AddSpacer(5)
+        #self.gwHardwareLb = wx.StaticText(self, label="[ Own_00: CPU-Intel(R) Core(TM) i7-8700 @3.2GHz, RAM-8GB ]")
+        #self.gwHardwareLb.SetForegroundColour(wx.Colour(200,200,200))
         vSizer.AddSpacer(10)
-        vSizer.Add(self.gwHardwareLb, flag=wx.ALIGN_BOTTOM, border=2)
+        #vSizer.Add(self.gwHardwareLb, flag=wx.ALIGN_BOTTOM, border=2)
         vSizer.AddSpacer(5)
-        gwILbs =(' IPAddr :', ' Version :',  'GPS_Pos:', ' UpdateTime:', ' DPDK_Info:' ,)
-        bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.VERTICAL,"GateWay Information", gwILbs, (400, 300))
+        gwILbs =(' GateWay ID :', ' IP Address :',  ' CPU Info :', ' RAM Info :', ' UpdateTime:' ,)
+        bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.VERTICAL," GateWay Computer Information ", gwILbs, (400, 300))
         vSizer.Add(bsizer1, flag=flagsR, border=2)
+        vSizer.AddSpacer(5)
+        self.tlsConnLb = wx.StaticText(self, label=" TLS Connection : ")
+        self.tlsConnLb.SetForegroundColour(wx.Colour(200,200,200))
+        vSizer.Add(self.tlsConnLb, flag=flagsR, border=2)
+        vSizer.AddSpacer(5)
+        self.tlsTF = wx.TextCtrl(self, size=(400, 250), style=wx.TE_MULTILINE)
+        vSizer.Add(self.tlsTF, flag=flagsR, border=2)
+        self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
         return vSizer
 
 #-----------------------------------------------------------------------------
@@ -181,8 +196,8 @@ class gwDsahboardFrame(wx.Frame):
         if now - self.lastPeriodicTime >= 3:
             if gv.iSimuMode:
                 x = {  "timestamp": str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")),
-                        "throughput_mbps": random.randint(1,20),
-                        "citpercent_ency": random.randint(1,20)
+                        "throughput_mbps": random.randint(1,9),
+                        "citpercent_ency": random.randint(1,9)
                     }
                 y = json.dumps(x)
                 with open('income.json', "a") as fh:
@@ -203,7 +218,7 @@ class gwDsahboardFrame(wx.Frame):
                     line = lines[-1].rstrip()
                     random2 = json.loads(line)
 
-                gv.iDataMgr.updateData(gv.iOwnID, [random1["throughput_mbps"], random1["citpercent_ency"], random2["throughput_mbps"], random2["citpercent_ency"]])
+                gv.iDataMgr.updateData(gv.iOwnID, [random1["throughput_mbps"],  random2["throughput_mbps"], random1["citpercent_ency"], random2["citpercent_ency"]])
 
 
                 #gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
@@ -211,6 +226,8 @@ class gwDsahboardFrame(wx.Frame):
                 dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
                 self.chartPanel.updateData(dataDict['Data'])
                 self.chartPanel.updateDisplay()
+                self.updateGateWayInfo(False)
+                
             self.ownInfoPanel.updateGridState()
             self.lastPeriodicTime = now
 
@@ -228,15 +245,41 @@ class gwDsahboardFrame(wx.Frame):
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
 
+    def appendTlsInfo(self, tlsList):
+        self.updateTlsDetail(' New TLS connection:')
+        self.updateTlsDetail(' Time : %s' %str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")))
+        lbList = (' Src IP address :',
+                  ' Dist IP address : ',
+                  ' TLS Version : ',
+                  ' TLS Cipher Suite : ')
+        for i, val in enumerate(lbList):
+            self.updateTlsDetail(val+str(tlsList[i]))
+        self.updateTlsDetail('---------------------------------------------------------\n\n')
+
+    def updateTlsDetail(self, data):
+        """ Update the data in the detail text field. Input 'None' will clear the 
+            detail information text field.
+        """
+        if data is None:
+            self.tlsTF.Clear()
+        else:
+            self.tlsTF.AppendText(" - %s \n" %str(data))
+
 #-----------------------------------------------------------------------------
-    def updateGateWayInfo(self):
+    def updateGateWayInfo(self, newGwFlag):
+        """ Update the gateway information.
+        """
         dataSet = gv.iDataMgr.getDataDict(gv.iSelectedGW)
-        print("----")
-        print(dataSet)
-        print("----")
-        datalist = (dataSet['IpMac'], dataSet['version'], dataSet['GPS'], dataSet['ReportT'])
-        for k, label in enumerate(datalist):
-            self.gwInfoLbs[k].SetLabel(str(label))
+        if newGwFlag:
+            datalist = (gv.iSelectedGW,
+                        dataSet['IpMac'],
+                        'Intel(R)Core(TM)i7-8700@3.2GHz',
+                        '8GB-DDR4 1333Hz',
+                        str(datetime.fromtimestamp(int(dataSet['ReportT']))))
+            for k, label in enumerate(datalist):
+                self.gwInfoLbs[k].SetLabel(str(label))
+        else:
+            self.gwInfoLbs[-1].SetLabel(str(datetime.fromtimestamp(int(dataSet['ReportT']))))
 
 #-----------------------------------------------------------------------------
     def onClose(self, event):

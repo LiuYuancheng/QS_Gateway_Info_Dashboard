@@ -73,9 +73,14 @@ class PanelGwInfo(wx.Panel):
         self.selGwlb = wx.StaticText(self, label=" GateWay ID - [] - offline ")
         hbox1.Add(self.selGwlb, flag=flagsR, border=2)
         hbox1.AddSpacer(50)
-        self.displayAcBt = wx.Button(self, label=' Show Gateway ', size=(300, 22))
+        self.displayAcBt = wx.Button(self, label=' Show Gateway ')
         self.displayAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
         hbox1.Add(self.displayAcBt, flag=flagsR, border=2)
+        hbox1.AddSpacer(10)
+        self.tlsSmuBt = wx.Button(self, label=' TLS simuilation ')
+        self.tlsSmuBt.Bind(wx.EVT_BUTTON, self.updateNewTls)
+        hbox1.Add(self.tlsSmuBt, flag=flagsR, border=2)
+
         mSizer.Add(hbox1, flag=flagsR, border=2)
         return mSizer
 
@@ -114,7 +119,11 @@ class PanelGwInfo(wx.Panel):
         """ Show the gateway information on the gateway display panel.
         """
         gv.iSelectedGW =self.selectedID
-        gv.iMainFrame.updateGateWayInfo()
+        gv.iMainFrame.updateGateWayInfo(True)
+        self.updateNewTls(None)
+
+    def updateNewTls(self, event):
+        gv.iMainFrame.appendTlsInfo(('137.132.213.225', '136.132.213.218', ' TLS 1.2', 'TLS_RSA_WITH_3DES_EDE_CBC_SHA'))
 
 #-----------------------------------------------------------------------------
     def updateGridState(self):
@@ -182,9 +191,12 @@ class PanelChart(wx.Panel):
         dc.DrawRectangle(40, 40, w-80, h-80)
         # DrawTitle:
         font = dc.GetFont()
+        font.SetPointSize(10)
+        dc.SetFont(font)
+        dc.DrawText(self.title, 200, 5)
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText(self.title, w//2-40, 30)
+
 
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
@@ -213,7 +225,7 @@ class PanelChart(wx.Panel):
         zx, zy = 40, h-40
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText('data:'+str(self.data[-1]), w-150, 80)
+        dc.DrawText('[ %s ]' %str(self.data[-1]), w-100, 40)
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
         gdc = wx.GCDC(dc)
         #self.lColor = (82, 153, 85)
@@ -255,8 +267,8 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
     def __init__(self, parent):
         """Constructor"""
         sc.SizedScrolledPanel.__init__(self, parent, size=(1110, 700))
-        #self.SetBackgroundColour(wx.Colour(200, 200, 210))
-        self.SetBackgroundColour(wx.Colour(18, 86, 133))
+        self.SetBackgroundColour(wx.Colour(200, 210, 210))
+        #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetSizer(self._buidUISizer())
 
     def _buidUISizer(self):
@@ -265,16 +277,16 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         mSizer = wx.BoxSizer(wx.VERTICAL)
         mSizer.AddSpacer(10)
         gs = wx.GridSizer(2, 2, 5, 5)
-        self.downPanel = PanelChart(self)
+        self.downPanel = PanelChart(self, recNum=80)
         gs.Add(self.downPanel,flag=flagsR, border=2)
         self.downPanel.setChartCmt('Income Throughput Speed', 'Mbps',(200, 0, 0))
-        self.uploadPanel = PanelChart(self)
+        self.uploadPanel = PanelChart(self, recNum=80)
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
         self.uploadPanel.setChartCmt('Outcome Throughput Speed', 'Mbps',(82, 153, 85))
-        self.throuthPanel = PanelChart(self)
+        self.throuthPanel = PanelChart(self, recNum=80)
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
         self.throuthPanel.setChartCmt('Income Packet Encryption Pct', '%',(0, 0, 200))
-        self.percetPanel = PanelChart(self)
+        self.percetPanel = PanelChart(self, recNum=80)
         gs.Add(self.percetPanel,flag=flagsR, border=2)
         self.percetPanel.setChartCmt('Outcome Packet Encryption Pct', '%', (120, 120, 120))
         mSizer.Add(gs, flag=flagsR, border=2)
@@ -292,7 +304,6 @@ class ChartDisplayPanel(sc.SizedScrolledPanel):
         self.uploadPanel.updateDisplay()
         self.throuthPanel.updateDisplay()
         self.percetPanel.updateDisplay()
-
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
