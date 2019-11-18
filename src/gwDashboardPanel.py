@@ -59,7 +59,7 @@ class PanelGwInfo(wx.Panel):
                   (90, 'DPDK Ver'),
                   (90, 'Crypt Ver'),
                   (90, 'DPDK Enc'),
-                  (90, 'Custom'),
+                  (90, 'Key Exchange'),
                   (120, 'GPS Position'),
                   (150, 'Login Time'),
                   (150, 'Last Report Time'))
@@ -96,7 +96,7 @@ class PanelGwInfo(wx.Panel):
                         str(dataDict['pdpkVer'][0]),
                         str(dataDict['pdpkVer'][1]),
                         str(dataDict['pdpkVer'][2]),
-                        str(dataDict['custom']),
+                        str(dataDict['keyExch']),
                         str(dataDict['GPS']),
                         str(dataDict['LoginT']),
                         str(datetime.fromtimestamp(int(dataDict['ReportT']))))
@@ -262,8 +262,79 @@ class PanelChart(wx.Panel):
         self.drawBG(dc)
         self.drawFG(dc)
 
+class ChartDisplayPanelLinux(wx.Panel):
+    """ chart to display data based on time.
+    """
+    def __init__(self, parent):
+        """ Init the panel."""
+        wx.Panel.__init__(self, parent, size=(1110, 750))
+        #self.SetBackgroundColour(wx.Colour(200, 210, 210))
+        #self.SetBackgroundColour(wx.Colour(18, 86, 133))
+        self.SetSizer(self._buidUISizer())
+    
+    def _buidUISizer(self):
+        """ Build the panel's main UI Sizer. """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        mSizer = wx.BoxSizer(wx.VERTICAL)
+        mSizer.AddSpacer(5)
+        titleFont = wx.Font(10, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)
+        gs = wx.FlexGridSizer(4, 2, 5, 5)
+        
+        itsLb = wx.StaticText(self, label=' Incoming Throughput Speed ')
+        itsLb.SetFont(titleFont)
+        itsLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        gs.Add(itsLb,flag=flagsR, border=2)
+        
+        otsLb = wx.StaticText(self, label=' Outgoing Throughput Speed ')
+        otsLb.SetFont(titleFont)
+        otsLb.SetForegroundColour(wx.Colour(200, 210, 200))
 
-class ChartDisplayPanel(sc.SizedScrolledPanel):
+        gs.Add(otsLb,flag=flagsR, border=2)
+        
+        self.downPanel = PanelChart(self, recNum=80)
+        gs.Add(self.downPanel,flag=flagsR, border=2)
+        self.downPanel.setChartCmt('Income Throughput Speed', 'Mbps',(200, 0, 0))
+
+        self.uploadPanel = PanelChart(self, recNum=80)
+        gs.Add(self.uploadPanel,flag=flagsR, border=2)
+        self.uploadPanel.setChartCmt('Outcome Throughput Speed', 'Mbps',(82, 153, 85))
+
+        
+        ipepLb = wx.StaticText(self, label=' Incoming Packet Encryption Percentage ')
+        ipepLb.SetFont(titleFont)
+        ipepLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        gs.Add(ipepLb,flag=flagsR, border=2)
+        
+        opepLb = wx.StaticText(self, label=' Outgoing Packet Encryption Percentage ')
+        opepLb.SetFont(titleFont)
+        opepLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        gs.Add(opepLb,flag=flagsR, border=2)
+        
+        self.throuthPanel = PanelChart(self, recNum=80)
+        gs.Add(self.throuthPanel,flag=flagsR, border=2)
+        self.throuthPanel.setChartCmt('Income Packet Encryption Pct', '%',(0, 0, 200))
+
+        self.percetPanel = PanelChart(self, recNum=80)
+        gs.Add(self.percetPanel,flag=flagsR, border=2)
+        self.percetPanel.setChartCmt('Outcome Packet Encryption Pct', '%', (120, 120, 120))
+        mSizer.Add(gs, flag=flagsR, border=2)
+        mSizer.AddSpacer(50)
+        return mSizer
+    
+    def updateData(self, dataList):
+        self.downPanel.setData(dataList[0])
+        self.uploadPanel.setData(dataList[1])
+        self.throuthPanel.setData(dataList[2])
+        self.percetPanel.setData(dataList[3])
+
+    def updateDisplay(self):
+        self.downPanel.updateDisplay()
+        self.uploadPanel.updateDisplay()
+        self.throuthPanel.updateDisplay()
+        self.percetPanel.updateDisplay()
+
+
+class ChartDisplayPanelWin(sc.SizedScrolledPanel):
     """ chart display panel.
     """
     #----------------------------------------------------------------------

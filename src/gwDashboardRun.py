@@ -24,7 +24,7 @@ import gwDashboardGobal as gv
 import gwDashboardPanel as gp
 
 PERIODIC = 500  # main thread periodically callback by 10ms.
-WIN_SIZE = (1560, 980) if gv.WIN_SYS else (1560, 900)
+WIN_SIZE = (1560, 980) if gv.WIN_SYS else (1560, 980)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ class gwDsahboardFrame(wx.Frame):
         self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
-        gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
+        gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)
         # Init the data manager. 
         gv.iDataMgr = GWDataMgr(self, dataSize=(4, 80))
         # Build the UI.
@@ -64,10 +64,13 @@ class gwDsahboardFrame(wx.Frame):
         # Row Idx 0: colum 0 - bashboad server information and gateway table.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.AddSpacer(5)
-        hbox0.Add(self._buildOwnInfoSizer(wx.VERTICAL), flag=flagsR, border=2)
+        ownInfoSzer = self._buildOwnInfoSizerWin(wx.VERTICAL) if gv.WIN_SYS else self._buildOwnInfoSizerLinux(wx.VERTICAL)
+        hbox0.Add(ownInfoSzer, flag=flagsR, border=2)
+
         # split line
         hbox0.AddSpacer(5)
-        hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 245),
+        lineLen = 245 if gv.WIN_SYS else 190
+        hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, lineLen),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         hbox0.AddSpacer(5)
         #  Row Idx 0: colum 1 - Deployed Gateway information.
@@ -87,7 +90,7 @@ class gwDsahboardFrame(wx.Frame):
         hbox2.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 660),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         hbox2.AddSpacer(5)
-        self.chartPanel = gp.ChartDisplayPanel(self)
+        self.chartPanel = gp.ChartDisplayPanelWin(self) if gv.WIN_SYS else gp.ChartDisplayPanelLinux(self)
         hbox2.Add(self.chartPanel, flag=flagsR, border=2)
         mSizer.Add(hbox2, flag=flagsR, border=2)
         return mSizer
@@ -118,10 +121,12 @@ class gwDsahboardFrame(wx.Frame):
         self.tlsTF = wx.TextCtrl(self, size=(400, 250), style=wx.TE_MULTILINE)
         vSizer.Add(self.tlsTF, flag=flagsR, border=2)
         self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
+        vSizer.AddSpacer(5)
+        vSizer.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         return vSizer
 
 #-----------------------------------------------------------------------------
-    def _buildOwnInfoSizer(self, layout):
+    def _buildOwnInfoSizerWin(self, layout):
         """ Build the server own information sizer: own information + network 
             information.
         """
@@ -148,6 +153,33 @@ class gwDsahboardFrame(wx.Frame):
         bsizer2, self.networkLbs = self._buildStateInfoBox(
             wx.VERTICAL, " Host Network Information ", netwLbs, (400, 300))
         hSizer.Add(bsizer2, flag=flagsR, border=2)
+        return hSizer
+
+#-----------------------------------------------------------------------------
+    def _buildOwnInfoSizerLinux(self, layout):
+        """ Build the server own information sizer: own information + network 
+            information.
+        """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        hSizer = wx.BoxSizer(layout)
+        self.titleLb = wx.StaticText(
+            self, label=" DashBoard Server Information ")
+        self.titleLb.SetFont(gv.iTitleFont)
+        self.titleLb.SetForegroundColour(wx.Colour(200, 200, 200))
+        hSizer.Add(self.titleLb, flag=flagsR, border=2)
+        hSizer.AddSpacer(10)
+        ownILbs = (' IP Address :',
+                   ' Running Mode :',
+                   ' GPS Position :',
+                   ' UPD Host : ',
+                   ' ISP Information :',
+                   ' Server Start Time :', 
+                   ' Total Gateway Reported :')
+        bsizer1, self.ownInfoLbs = self._buildStateInfoBox(
+            wx.VERTICAL, " Host Computer Information ", ownILbs, (400, 300))
+        hSizer.Add(bsizer1, flag=flagsR, border=2)
+        hSizer.AddSpacer(5)
+        self.networkLbs = None
         return hSizer
 
 #-----------------------------------------------------------------------------
@@ -322,7 +354,7 @@ class GWDataMgr(object):
             'IpMac':    ipStr,
             'version':  version,
             'pdpkVer':  ('19.08', 'Openssl', 'AES-CBC 256'),
-            'custom':   'Custom',
+            'keyExch':  'Custom',
             'GPS':      gps,
             'LoginT':   datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT':  time.time(),
@@ -362,15 +394,18 @@ class ownSpeedTest(threading.Thread):
             s.connect(("8.8.8.8", 80))
             ipAddr = str(s.getsockname()[0])
             s.close()
-            mode = 'MasterMode :'+str(gv.SE_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.SE_IP[1])
+            mode = 'MasterMode' if gv.iMasterMode else 'SlaveMode'
             gps = '[1.2988,103.836]'
             isp = 'Singtel'
-            gv.iMainFrame.updateOwnInfo(0,(ipAddr, mode, gps, isp))
-            downloadSp =  str(random.randint(200,400))+'.0Mbps'
-            uploadSp = str(random.randint(100,250))+'.0Mbps'
-            lantency = str(10+random.randint(1,20))+'ms'
-            timeStr = datetime.now().strftime("%H:%M:%S")
-            gv.iMainFrame.updateOwnInfo(1,(downloadSp, uploadSp, lantency, timeStr))
+            if gv.WIN_SYS:
+                gv.iMainFrame.updateOwnInfo(0,(ipAddr, mode, gps, isp))
+                downloadSp =  str(random.randint(200,400))+'.0Mbps'
+                uploadSp = str(random.randint(100,250))+'.0Mbps'
+                lantency = str(10+random.randint(1,20))+'ms'
+                timeStr = datetime.now().strftime("%H:%M:%S")
+                gv.iMainFrame.updateOwnInfo(1,(downloadSp, uploadSp, lantency, timeStr))
+            else: 
+                gv.iMainFrame.updateOwnInfo(0,(ipAddr, mode, gps, str(gv.SE_IP), isp, datetime.now().strftime("%H:%M:%S"), '1'))
             self.terminate = True # don't run the speed test loop.
         print("Speed test server connected")
 
