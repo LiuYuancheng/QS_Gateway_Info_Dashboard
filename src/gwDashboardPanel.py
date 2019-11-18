@@ -47,20 +47,22 @@ class PanelGwInfo(wx.Panel):
         mSizer.Add(hbox, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         # Row idx 1: Add the client connection grid.
-        self.collumNum = 9
+        self.rowNum = 8 if gv.WIN_SYS else 5
+        self.collumNum = 10
         self.grid = wx.grid.Grid(self, -1)
-        self.grid.CreateGrid(8, self.collumNum)
+        self.grid.CreateGrid(self.rowNum, self.collumNum)
         # Set the Grid size.
-        self.grid.SetRowLabelSize(40)
-        lbList = ((100, 'GateWay_ID'),
-                  (100, 'IP_Address'),
-                  (100, 'GW_Ver'),
-                  (100, 'DPDK_Ver'),
-                  (120, 'Crypt_Ver'),
-                  (120, 'DPDK_Enc'),
-                  (120, 'GPS_Position'),
-                  (150, 'Login_Time'),
-                  (150, 'Last_Report_Time'))
+        self.grid.SetRowLabelSize(30)
+        lbList = ((100, 'Gateway ID'),
+                  (110, 'IP Address'),
+                  (90, 'GW Ver'),
+                  (90, 'DPDK Ver'),
+                  (90, 'Crypt Ver'),
+                  (90, 'DPDK Enc'),
+                  (90, 'Custom'),
+                  (120, 'GPS Position'),
+                  (150, 'Login Time'),
+                  (150, 'Last Report Time'))
         for i, val in enumerate(lbList):
             self.grid.SetColSize(i, val[0])
             self.grid.SetColLabelValue(i, val[1])
@@ -94,6 +96,7 @@ class PanelGwInfo(wx.Panel):
                         str(dataDict['pdpkVer'][0]),
                         str(dataDict['pdpkVer'][1]),
                         str(dataDict['pdpkVer'][2]),
+                        str(dataDict['custom']),
                         str(dataDict['GPS']),
                         str(dataDict['LoginT']),
                         str(datetime.fromtimestamp(int(dataDict['ReportT']))))

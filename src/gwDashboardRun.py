@@ -24,13 +24,15 @@ import gwDashboardGobal as gv
 import gwDashboardPanel as gp
 
 PERIODIC = 500  # main thread periodically callback by 10ms.
+WIN_SIZE = (1560, 980) if gv.WIN_SYS else (1560, 900)
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class gwDsahboardFrame(wx.Frame):
     """ gateway dashboard main UI frame."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(1560, 980))
+        wx.Frame.__init__(self, parent, id, title, size=WIN_SIZE)
         gv.iMainFrame = self
         self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
@@ -194,7 +196,7 @@ class gwDsahboardFrame(wx.Frame):
         """ Periodic call back to handle all the functions."""
         now = time.time()
         if now - self.lastPeriodicTime >= 3:
-            if gv.iSimuMode and gv.iSelectedGW:
+            if gv.iSimuMode:
                 x = {  "timestamp": str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")),
                         "throughput_mbps": random.randint(1,9),
                         "citpercent_ency": random.randint(1,9)
@@ -288,64 +290,6 @@ class gwDsahboardFrame(wx.Frame):
         self.reportServ.stop()
         self.Destroy()
 
-#-----------------------------------------------------------------------------
-    def x_buidUISizerOld(self):
-        """ Build the main UI Sizer. (Currently not used.)"""
-        flagsR = wx.RIGHT
-        mSizer = wx.BoxSizer(wx.HORIZONTAL)
-        mSizer.AddSpacer(5)
-        vbox0 = wx.BoxSizer(wx.VERTICAL)
-        vbox0.AddSpacer(5)
-        vbox0.Add(self._buildOwnInfoSizer(wx.HORIZONTAL), flag=flagsR, border=2)
-        vbox0.AddSpacer(5)
-        self.ownInfoPanel = gp.PanelGwInfo(self)
-        vbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
-        mSizer.Add(vbox0, flag=flagsR, border=2)
-        mSizer.AddSpacer(5)
-        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 1120),
-                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
-        mSizer.AddSpacer(5)
-        vbox1 = wx.BoxSizer(wx.VERTICAL)
-        self.gwtitleLb = wx.StaticText(self, label="GateWay data display")
-        self.gwtitleLb.SetFont(gv.iTitleFont)
-        self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
-        vbox1.Add(self.gwtitleLb, flag=flagsR, border=2)    
-        vbox1.AddSpacer(5)
-        vbox1.Add(self._buildGatewaySizer(wx.HORIZONTAL), flag=flagsR, border=2)
-        vbox1.AddSpacer(5)
-        self.chartPanel = gp.ChartDisplayPanel(self)
-        vbox1.Add(self.chartPanel, flag=flagsR, border=2)
-        mSizer.Add(vbox1, flag=flagsR, border=2)
-        return mSizer
-
-#-----------------------------------------------------------------------------
-    def x_buildOwnInfoSizerOld(self, layout):
-        """ Build the main UI Sizer. (Currently not used.)"""
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        hSizer = wx.BoxSizer(layout)
-        ownILbs =(' IP Address:', ' Running Mode:', ' GPS Position:', ' ISP Information:')
-        bsizer1, self.ownInfoLbs = self._buildStateInfoBox(wx.VERTICAL, "DashBoard Own Information", ownILbs, (250, 300))
-        hSizer.Add(bsizer1, flag=flagsR, border=2)
-        hSizer.AddSpacer(20)
-        netwLbs = (' DownLoad Speed [Mbps]:', ' Upload Speed [Mbps]:', ' Network Latency [ms]', ' Last Update Time:')
-        bsizer2, self.networkLbs = self._buildStateInfoBox(wx.VERTICAL,"Host Network Information", netwLbs, (400, 300))
-        hSizer.Add(bsizer2, flag=flagsR, border=2)
-        return hSizer
-
-#-----------------------------------------------------------------------------
-    def x_buildGatewaySizerOld(self, layout):
-        """ Build the main UI Sizer. (Currently not used.)"""
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        hSizer = wx.BoxSizer(layout)
-        gwILbs =(' Gateway IPAddr:', ' GateWay Mac:', ' GateWay GPS Pos:', ' Last Report Time:')
-        bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.VERTICAL,"GateWay Information", gwILbs, (250, 300))
-        hSizer.Add(bsizer1, flag=flagsR, border=2)
-        hSizer.AddSpacer(20)
-        gwDLbs =(' Data 0:', ' Data 1:', ' Data 2:', ' Data 3:')
-        bsizer2, self.gwDataLbs = self._buildStateInfoBox(wx.VERTICAL,"GateWay Data", gwDLbs, (650, 300))
-        hSizer.Add(bsizer2, flag=flagsR, border=2)
-        bsizer1.AddSpacer(5)
-        return hSizer
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -378,6 +322,7 @@ class GWDataMgr(object):
             'IpMac':    ipStr,
             'version':  version,
             'pdpkVer':  ('19.08', 'Openssl', 'AES-CBC 256'),
+            'custom':   'Custom',
             'GPS':      gps,
             'LoginT':   datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT':  time.time(),
@@ -413,10 +358,13 @@ class ownSpeedTest(threading.Thread):
         self.testServ.get_best_server()
         # Load the simulation information if the 
         if gv.iSimuMode:
-            ipAddr = '137.132.211.202'
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ipAddr = str(s.getsockname()[0])
+            s.close()
             mode = 'MasterMode :'+str(gv.SE_IP[1]) if gv.iMasterMode else 'SlaveMode :'+str(gv.SE_IP[1])
-            gps = '[1.36672, 103.81]'
-            isp = 'NUS'
+            gps = '[1.2988,103.836]'
+            isp = 'Singtel'
             gv.iMainFrame.updateOwnInfo(0,(ipAddr, mode, gps, isp))
             downloadSp =  str(random.randint(200,400))+'.0Mbps'
             uploadSp = str(random.randint(100,250))+'.0Mbps'
@@ -453,7 +401,7 @@ class ownSpeedTest(threading.Thread):
             time.sleep(5) # main video more smoth
             print(results_dict)
             if self.counter == 0: return
-        print('Tello video server terminated.')
+        print('Dash board server terminated.')
 
     def stop(self):
         self.terminate = True
@@ -479,7 +427,7 @@ class GWReportServ(threading.Thread):
                 gv.iMainFrame.parseMsg(self.recvMsg)
 
         self.sock.close()
-        print('Tello control server terminated')
+        print('Gateway report server terminated.')
 
     def stop(self):
         """ Send back a None message to terminate the buffer reading waiting part."""

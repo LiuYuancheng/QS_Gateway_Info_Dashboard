@@ -11,10 +11,13 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import os
+import sys
 
 dirpath = os.getcwd()
 print("Current working directory is : %s" % dirpath)
 APP_NAME = 'Quantum Safe Gateway Dashboard'
+#WIN_SYS = sys.platform.startswith('win')
+WIN_SYS = False
 
 #------<IMAGES PATH>-------------------------------------------------------------
 IMG_FD = 'img'
