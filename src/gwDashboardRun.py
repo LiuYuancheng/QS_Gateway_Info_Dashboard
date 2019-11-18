@@ -59,7 +59,7 @@ class gwDsahboardFrame(wx.Frame):
         """ Build the main UI Sizer. """
         flagsR = wx.RIGHT
         mSizer = wx.BoxSizer(wx.VERTICAL)
-        # Row Idx 1: bashboad server information and gateway table.
+        # Row Idx 0: colum 0 - bashboad server information and gateway table.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.AddSpacer(5)
         hbox0.Add(self._buildOwnInfoSizer(wx.VERTICAL), flag=flagsR, border=2)
@@ -67,7 +67,7 @@ class gwDsahboardFrame(wx.Frame):
         hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 245),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         hbox0.AddSpacer(5)
-
+        #  Row Idx 0: colum 1 - Deployed Gateway information.
         gv.iGWTablePanel = self.ownInfoPanel = gp.PanelGwInfo(self)
         hbox0.Add(self.ownInfoPanel, flag=flagsR, border=2)
         mSizer.Add(hbox0, flag=flagsR, border=2)
@@ -105,11 +105,13 @@ class gwDsahboardFrame(wx.Frame):
 
 #-----------------------------------------------------------------------------
     def _buildOwnInfoSizer(self, layout):
-        """ Build the server own information sizer: own information + network information.
+        """ Build the server own information sizer: own information + network 
+            information.
         """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         hSizer = wx.BoxSizer(layout)
-        self.titleLb = wx.StaticText(self, label=" DashBoard Server Information ")
+        self.titleLb = wx.StaticText(
+            self, label=" DashBoard Server Information ")
         self.titleLb.SetFont(gv.iTitleFont)
         self.titleLb.SetForegroundColour(wx.Colour(200, 200, 200))
         hSizer.Add(self.titleLb, flag=flagsR, border=2)
@@ -119,13 +121,13 @@ class gwDsahboardFrame(wx.Frame):
                    ' GPS Position :',
                    ' ISP Information :')
         bsizer1, self.ownInfoLbs = self._buildStateInfoBox(
-            wx.VERTICAL, " DashBoard Own Information ", ownILbs, (400, 300))
+            wx.VERTICAL, " Host Computer Information ", ownILbs, (400, 300))
         hSizer.Add(bsizer1, flag=flagsR, border=2)
         hSizer.AddSpacer(5)
         netwLbs = (' DownLoad Speed [Mbps] :',
                    ' Upload Speed [Mbps] :',
                    ' Network Latency [ms] :',
-                   ' Last Update Time :')
+                   ' Last Update Time[H:M:S] :')
         bsizer2, self.networkLbs = self._buildStateInfoBox(
             wx.VERTICAL, " Host Network Information ", netwLbs, (400, 300))
         hSizer.Add(bsizer2, flag=flagsR, border=2)
@@ -209,7 +211,7 @@ class gwDsahboardFrame(wx.Frame):
                 dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
                 self.chartPanel.updateData(dataDict['Data'])
                 self.chartPanel.updateDisplay()
-            self.ownInfoPanel.updateGrid()
+            self.ownInfoPanel.updateGridState()
             self.lastPeriodicTime = now
 
 #-----------------------------------------------------------------------------
@@ -332,7 +334,7 @@ class GWDataMgr(object):
             'Idx':      self.gwCount, 
             'IpMac':    ipStr,
             'version':  version,
-            'pdpkVer':  '19.08',
+            'pdpkVer':  ('19.08', 'Openssl', 'AES-CBC 256'),
             'GPS':      gps,
             'LoginT':   datetime.now().strftime("%m_%d_%Y_%H:%M:%S"),
             'ReportT':  time.time(),
@@ -345,6 +347,8 @@ class GWDataMgr(object):
 
 #-----------------------------------------------------------------------------
     def updateData(self, gwID, dataList):
+        """ Update the 
+        """
         if gwID in self.dataDict.keys():
             self.dataDict[gwID]['ReportT'] = time.time()
             for k, dataSet in enumerate(self.dataDict[gwID]['Data']):

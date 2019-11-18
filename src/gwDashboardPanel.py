@@ -25,7 +25,8 @@ class PanelGwInfo(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
-        self.selectedID = ''
+        self.selectedID = ''    # selected ID by User.
+        self.toggle = False         # delay toggle flag.
         self.SetSizer(self._buidUISizer())
 
 #-----------------------------------------------------------------------------
@@ -35,10 +36,10 @@ class PanelGwInfo(wx.Panel):
         mSizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx 0: gateway title line.
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.gwLabel = wx.StaticText(self, label=" Deployed Gateway Information")
+        self.gwLabel = wx.StaticText(self, label=" Deployed Gateway Information ")
         self.gwLabel.SetFont(gv.iTitleFont)
         hbox.Add(self.gwLabel, flag=flagsR, border=2)
-        hbox.AddSpacer(20)
+        hbox.AddSpacer(30)
         #self.gwStLb = wx.StaticText(self, label="[Online/Total]: 0/0")
         #hbox.Add(self.gwStLb, flag=wx.ALIGN_BOTTOM, border=2)
         #hbox.AddSpacer(20)
@@ -46,18 +47,20 @@ class PanelGwInfo(wx.Panel):
         mSizer.Add(hbox, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         # Row idx 1: Add the client connection grid.
-        collumNum = 7
+        self.collumNum = 9
         self.grid = wx.grid.Grid(self, -1)
-        self.grid.CreateGrid(8, collumNum)
+        self.grid.CreateGrid(8, self.collumNum)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
-        lbList = ((100,  'GateWay_ID'),
+        lbList = ((100, 'GateWay_ID'),
                   (100, 'IP_Address'),
-                  (100,  'GW_Ver'),
-                  (100,  'DPDK_Ver'),
+                  (100, 'GW_Ver'),
+                  (100, 'DPDK_Ver'),
+                  (120, 'Crypt_Ver'),
+                  (120, 'DPDK_Enc'),
                   (120, 'GPS_Position'),
-                  (120, 'Login_Time'),
-                  (110, 'Last_Report_Time'))
+                  (150, 'Login_Time'),
+                  (150, 'Last_Report_Time'))
         for i, val in enumerate(lbList):
             self.grid.SetColSize(i, val[0])
             self.grid.SetColLabelValue(i, val[1])
@@ -66,13 +69,13 @@ class PanelGwInfo(wx.Panel):
         mSizer.AddSpacer(5)
         # Row idx 2: Display active.
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox1.Add(wx.StaticText(self, label="Selected GateWay: "), flag=flagsR, border=2)
-        self.selGwlb = wx.StaticText(self, label="GateWay ID[xxx.xxx.xxx.xxx]")
+        hbox1.Add(wx.StaticText(self, label=" Selected GateWay: "), flag=flagsR, border=2)
+        self.selGwlb = wx.StaticText(self, label=" GateWay ID - [] - offline ")
         hbox1.Add(self.selGwlb, flag=flagsR, border=2)
-        hbox1.AddSpacer(250)
-        self.trackAcBt = wx.Button(self, label='Show the gateway detail data', size=(220, 22))
-        self.trackAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
-        hbox1.Add(self.trackAcBt, flag=flagsR, border=2)
+        hbox1.AddSpacer(50)
+        self.displayAcBt = wx.Button(self, label=' Show Gateway ', size=(300, 22))
+        self.displayAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
+        hbox1.Add(self.displayAcBt, flag=flagsR, border=2)
         mSizer.Add(hbox1, flag=flagsR, border=2)
         return mSizer
 
@@ -83,11 +86,14 @@ class PanelGwInfo(wx.Panel):
         dataSequence = (str(dataID),
                         str(dataDict['IpMac']),
                         str(dataDict['version']),
-                        str(dataDict['pdpkVer']),
+                        str(dataDict['pdpkVer'][0]),
+                        str(dataDict['pdpkVer'][1]),
+                        str(dataDict['pdpkVer'][2]),
                         str(dataDict['GPS']),
                         str(dataDict['LoginT']),
-                        str(dataDict['ReportT']))
-        for i in range(7):
+                        str(datetime.fromtimestamp(int(dataDict['ReportT']))))
+                        #str(time.strftime("%H:%M:%S", time.gmtime(dataDict['ReportT']))))
+        for i in range(self.collumNum):
             self.grid.SetCellValue(rowIdx, i, dataSequence[i])
         self.grid.Refresh(True)
 
@@ -105,11 +111,13 @@ class PanelGwInfo(wx.Panel):
 
 #-----------------------------------------------------------------------------
     def onShowGw(self, event):
+        """ Show the gateway information on the gateway display panel.
+        """
         gv.iSelectedGW =self.selectedID
         gv.iMainFrame.updateGateWayInfo()
 
 #-----------------------------------------------------------------------------
-    def updateGrid(self):
+    def updateGridState(self):
         """ update the grid report time data and connection indicator."""
         for (_, item) in gv.iDataMgr.getDataDict('items()'):
             idx = item['Idx']
@@ -118,10 +126,14 @@ class PanelGwInfo(wx.Panel):
             if  deltT > 10:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
             elif 5 < deltT <= 10:
-                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('YELLOW'))
+                if self.toggle:
+                    self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('YELLOW'))
+                else:
+                    self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
+                self.toggle = not self.toggle
             else:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('GREEN'))
-            self.grid.SetCellValue(idx, 6, str(rpTime))
+            self.grid.SetCellValue(idx, self.collumNum-1 , str(datetime.fromtimestamp(int(rpTime))))
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
