@@ -285,7 +285,8 @@ class ChartDisplayPanelLinux(wx.Panel):
         itsLb = wx.StaticText(self, label=' Incoming Throughput Speed ')
         itsLb.SetFont(titleFont)
         itsLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        itsLb.Bind(wx.EVT_ENTER_WINDOW, self.onText)
+        itsLb.SetToolTipString("xzxzzzzzzzzzzzzzzzzzzzzzz")
+        #itsLb.Bind(wx.EVT_ENTER_WINDOW, self.onText)
 
 
         gs.Add(itsLb,flag=flagsR, border=2)
