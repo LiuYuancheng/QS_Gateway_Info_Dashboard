@@ -144,7 +144,7 @@ class PanelGwInfo(wx.Panel):
                     self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
                 self.toggle = not self.toggle
             else:
-                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('GREEN'))
+                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour((0, 255, 0)))
             self.grid.SetCellValue(idx, self.collumNum-1 , str(datetime.fromtimestamp(int(rpTime))))
 
 #-----------------------------------------------------------------------------
@@ -152,10 +152,10 @@ class PanelGwInfo(wx.Panel):
 class PanelChart(wx.Panel):
     """ chart to display data based on time.
     """
-    def __init__(self, parent, recNum=20, axisRng=(10, 1), pnlSize=(540, 320)):
+    def __init__(self, parent, recNum=20, axisRng=(10, 1), pnlSize=(550, 320)):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=pnlSize)
-        self.SetBackgroundColour(wx.Colour(230, 230, 230))
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.title = ''     
         self.yLabel = ''
         self.lColor = (82, 153, 85)
@@ -228,14 +228,16 @@ class PanelChart(wx.Panel):
         zx, zy = 40, h-40
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText('[ %s ]' %str(self.data[-1]), w-100, 40)
+        dc.DrawText('Peak Value: [ %s ]' %str(self.data[-1]), w-100, 5)
+        dc.DrawText('Current Value[ %s ]' %str(self.data[-1]), w-100, 20)
+
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
         gdc = wx.GCDC(dc)
         #self.lColor = (82, 153, 85)
         (r, g, b),  alph = self.lColor, 128 # half transparent alph
         gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
-        delta = offsetX*9//self.recNum
-        poligon =[(zx, zy+1)]+[(zx+i*delta, int(zy-self.data[i]*offsetY)) for i in range(self.recNum)]+[(offsetX*10, zy+1)]
+        delta, scale = offsetX*9//self.recNum, self.axisRng[1]
+        poligon =[(zx, zy+1)]+[(zx+i*delta, int( zy- min(self.data[i]/scale, 10)*offsetY)) for i in range(self.recNum)]+[(offsetX*10, zy+1)]
         gdc.DrawPolygon(poligon)
 
 #--PanelChart--------------------------------------------------------------------
@@ -267,7 +269,7 @@ class ChartDisplayPanelLinux(wx.Panel):
     """
     def __init__(self, parent):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(1110, 750))
+        wx.Panel.__init__(self, parent, size=(1120, 750))
         #self.SetBackgroundColour(wx.Colour(200, 210, 210))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetSizer(self._buidUISizer())
@@ -293,11 +295,11 @@ class ChartDisplayPanelLinux(wx.Panel):
         
         self.downPanel = PanelChart(self, recNum=80)
         gs.Add(self.downPanel,flag=flagsR, border=2)
-        self.downPanel.setChartCmt('Income Throughput Speed', 'Mbps',(200, 0, 0))
+        self.downPanel.setChartCmt(' ', 'Mbps',(200, 0, 0))
 
         self.uploadPanel = PanelChart(self, recNum=80)
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
-        self.uploadPanel.setChartCmt('Outcome Throughput Speed', 'Mbps',(82, 153, 85))
+        self.uploadPanel.setChartCmt(' ', 'Mbps',(82, 153, 85))
 
         
         ipepLb = wx.StaticText(self, label=' Incoming Packet Encryption Percentage ')
@@ -310,13 +312,13 @@ class ChartDisplayPanelLinux(wx.Panel):
         opepLb.SetForegroundColour(wx.Colour(200, 210, 200))
         gs.Add(opepLb,flag=flagsR, border=2)
         
-        self.throuthPanel = PanelChart(self, recNum=80)
+        self.throuthPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
-        self.throuthPanel.setChartCmt('Income Packet Encryption Pct', '%',(0, 0, 200))
+        self.throuthPanel.setChartCmt(' ', '   %',(0, 0, 200))
 
-        self.percetPanel = PanelChart(self, recNum=80)
+        self.percetPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.percetPanel,flag=flagsR, border=2)
-        self.percetPanel.setChartCmt('Outcome Packet Encryption Pct', '%', (120, 120, 120))
+        self.percetPanel.setChartCmt(' ', '   %', (120, 120, 120))
         mSizer.Add(gs, flag=flagsR, border=2)
         mSizer.AddSpacer(50)
         return mSizer
@@ -340,7 +342,7 @@ class ChartDisplayPanelWin(sc.SizedScrolledPanel):
     #----------------------------------------------------------------------
     def __init__(self, parent):
         """Constructor"""
-        sc.SizedScrolledPanel.__init__(self, parent, size=(1110, 700))
+        sc.SizedScrolledPanel.__init__(self, parent, size=(1120, 700))
         self.SetBackgroundColour(wx.Colour(200, 210, 210))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetSizer(self._buidUISizer())

@@ -23,7 +23,7 @@ WIN_SYS = False
 IMG_FD = 'img'
 ICO_PATH = os.path.join(dirpath, IMG_FD, "gwIcon.ico")
 NWSAM_PATH = os.path.join(dirpath, IMG_FD, "networkSample.png")
-LOGO_PATH = os.path.join(dirpath, IMG_FD, "logo1.jpg")
+LOGO_PATH = os.path.join(dirpath, IMG_FD, "logo.jpg")
 
 # dashboard own UDP server IP address.
 SE_IP = ('0.0.0.0', 5005)       # Sensor server IP
