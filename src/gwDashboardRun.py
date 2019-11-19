@@ -38,6 +38,7 @@ class gwDsahboardFrame(wx.Frame):
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         gv.iTitleFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)
+        self.tlsTimeStr = ''    # new tls time string.
         # Init the data manager. 
         gv.iDataMgr = GWDataMgr(self, dataSize=(4, 80))
         # Build the UI.
@@ -55,6 +56,7 @@ class gwDsahboardFrame(wx.Frame):
         self.timer.Start(PERIODIC)  # every 0.5s
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.SetDoubleBuffered(True)
+    
 
 #-----------------------------------------------------------------------------
     def _buidUISizer(self):
@@ -259,6 +261,9 @@ class gwDsahboardFrame(wx.Frame):
 
 
                 #gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
+            # Check the tls json file.
+            self.checkTLSRpt()
+
             if gv.iSelectedGW:
                 dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
                 self.chartPanel.updateData(dataDict['Data'])
@@ -267,6 +272,7 @@ class gwDsahboardFrame(wx.Frame):
                 
             self.ownInfoPanel.updateGridState()
             self.lastPeriodicTime = now
+
 
 #-----------------------------------------------------------------------------
     def updateOwnInfo(self, dataKey, args):
@@ -287,12 +293,24 @@ class gwDsahboardFrame(wx.Frame):
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
 
+    def checkTLSRpt(self):
+        """ read the json file to get the TLS data."""
+        tlsDict = None
+        with open('tlsRecord.json', "r") as fh:
+            lines = fh.readlines()
+            line = lines[-1].rstrip()
+            tlsDict = json.loads(line)
+        
+        if self.tlsTimeStr != tlsDict['Time']:
+            self.tlsTimeStr = tlsDict['Time']
+            self.appendTlsInfo((tlsDict['Src IP address'], tlsDict['Dest IP address'], tlsDict['TLS Version'], tlsDict['TLS Cipher Suite']))
+
 
     def appendTlsInfo(self, tlsList):
         self.updateTlsDetail(' New TLS connection:')
         self.updateTlsDetail(' Time : %s' %str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")))
         lbList = (' Src IP address :',
-                  ' Dist IP address : ',
+                  ' Dest IP address : ',
                   ' TLS Version : ',
                   ' TLS Cipher Suite : ')
         for i, val in enumerate(lbList):
@@ -398,7 +416,7 @@ class ownSpeedTest(threading.Thread):
         self.testServ.get_servers(servers)
         self.testServ.get_best_server()
         # Load the simulation information if the 
-        if gv.iSimuMode:
+        if not gv.iMasterMode:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))
             ipAddr = str(s.getsockname()[0])

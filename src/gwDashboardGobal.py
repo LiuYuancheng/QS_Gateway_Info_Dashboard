@@ -30,7 +30,7 @@ SE_IP = ('0.0.0.0', 5005)       # Sensor server IP
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFrame = None
-iSimuMode = True    #simulation mode.
+iSimuMode = False    #simulation mode.
 iDataMgr = None
 iOwnID = 'Own_00'
 iSelectedGW = None  # selected gateway ID
