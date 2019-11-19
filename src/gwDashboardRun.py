@@ -87,12 +87,15 @@ class gwDsahboardFrame(wx.Frame):
         hbox2.AddSpacer(5)
         hbox2.Add(self._buildGatewaySizer(), flag=flagsR, border=2)
         hbox2.AddSpacer(5)
-        hbox2.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 660),
+        hbox2.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 700),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         hbox2.AddSpacer(5)
         self.chartPanel = gp.ChartDisplayPanelWin(self) if gv.WIN_SYS else gp.ChartDisplayPanelLinux(self)
         hbox2.Add(self.chartPanel, flag=flagsR, border=2)
         mSizer.Add(hbox2, flag=flagsR, border=2)
+        mSizer.AddSpacer(5)
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1530, -1),
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         return mSizer
 
 #-----------------------------------------------------------------------------
@@ -273,7 +276,7 @@ class gwDsahboardFrame(wx.Frame):
         if dataKey == 0:
             for k, label in enumerate(self.ownInfoLbs):
                 label.SetLabel(args[k])
-            if not gv.iMasterMode:
+            if gv.iMasterMode:
                 with open('gwConfig.json', "r") as fh:
                     lines = fh.readlines()
                     line = lines[-1].rstrip()
@@ -283,8 +286,6 @@ class gwDsahboardFrame(wx.Frame):
         elif dataKey == 1:
             for k, label in enumerate(self.networkLbs):
                 label.SetLabel(args[k])
-
-
 
 
     def appendTlsInfo(self, tlsList):

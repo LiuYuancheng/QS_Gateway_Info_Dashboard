@@ -79,7 +79,7 @@ class PanelGwInfo(wx.Panel):
         self.displayAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
         hbox1.Add(self.displayAcBt, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
-        self.tlsSmuBt = wx.Button(self, label=' TLS simuilation ')
+        self.tlsSmuBt = wx.Button(self, label=' TLS simulation ')
         self.tlsSmuBt.Bind(wx.EVT_BUTTON, self.updateNewTls)
         hbox1.Add(self.tlsSmuBt, flag=flagsR, border=2)
 
@@ -269,7 +269,7 @@ class ChartDisplayPanelLinux(wx.Panel):
     """
     def __init__(self, parent):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(1120, 750))
+        wx.Panel.__init__(self, parent, size=(1120, 700))
         #self.SetBackgroundColour(wx.Colour(200, 210, 210))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetSizer(self._buidUISizer())
@@ -285,16 +285,17 @@ class ChartDisplayPanelLinux(wx.Panel):
         itsLb = wx.StaticText(self, label=' Incoming Throughput Speed ')
         itsLb.SetFont(titleFont)
         itsLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        itsLb.SetToolTipString("xzxzzzzzzzzzzzzzzzzzzzzzz")
-        #itsLb.Bind(wx.EVT_ENTER_WINDOW, self.onText)
-
-
+        itsLb.SetToolTip("Data helper string: \n \
+                         Gate way average incoming data packed speed.\n \
+                         unit:Mbps")
         gs.Add(itsLb,flag=flagsR, border=2)
         
         otsLb = wx.StaticText(self, label=' Outgoing Throughput Speed ')
         otsLb.SetFont(titleFont)
         otsLb.SetForegroundColour(wx.Colour(200, 210, 200))
-
+        otsLb.SetToolTip("Data helper string: \n \
+                    Gate way average incoming data packed speed.\n \
+                    unit:Mbps")
         gs.Add(otsLb,flag=flagsR, border=2)
         
         self.downPanel = PanelChart(self, recNum=80)
@@ -309,11 +310,18 @@ class ChartDisplayPanelLinux(wx.Panel):
         ipepLb = wx.StaticText(self, label=' Incoming Packet Encryption Percentage ')
         ipepLb.SetFont(titleFont)
         ipepLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        ipepLb.SetToolTip("Data helper string: \n \
+            Gate way average incoming data packed speed.\n \
+            unit:Mbps")
         gs.Add(ipepLb,flag=flagsR, border=2)
+        
         
         opepLb = wx.StaticText(self, label=' Outgoing Packet Encryption Percentage ')
         opepLb.SetFont(titleFont)
         opepLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        ipepLb.SetToolTip("Data helper string: \n \
+            Gate way average incoming data packed speed.\n \
+            unit:Mbps")
         gs.Add(opepLb,flag=flagsR, border=2)
         
         self.throuthPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
@@ -327,10 +335,6 @@ class ChartDisplayPanelLinux(wx.Panel):
         mSizer.AddSpacer(50)
         return mSizer
     
-    def onText(self, event): 
-        print('-')
-
-
     def updateData(self, dataList):
         self.downPanel.setData(dataList[0])
         self.uploadPanel.setData(dataList[1])
