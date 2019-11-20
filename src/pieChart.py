@@ -41,9 +41,7 @@ class PanelPieChart(wx.Panel):
         self.part1.SetValue(b)
         self.part1.SetLabel('data %s' %str(b))
         #self.Refresh(False)
-
-
-
+        
 class MyFrame(wx.Frame):
 
     def __init__(self, parent):

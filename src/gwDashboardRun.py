@@ -34,10 +34,11 @@ class gwDsahboardFrame(wx.Frame):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, id, title, size=WIN_SIZE)
         gv.iMainFrame = self
+        self.SetIcon(wx.Icon(gv.ICO_PATH))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         #self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetBackgroundColour(wx.Colour(30, 30, 30))
-        self.SetIcon(wx.Icon(gv.ICO_PATH))
+        
         gv.iTitleFont = wx.Font(12, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)
         gv.iWeidgeClr = wx.Colour(46, 52, 66)
         self.tlsTimeStr = ''    # new tls time string.
@@ -45,6 +46,7 @@ class gwDsahboardFrame(wx.Frame):
         gv.iDataMgr = GWDataMgr(self, dataSize=(4, 80))
         # Build the UI.
         self.SetSizer(self._buidUISizer())
+
         # Init the own network speed test thread.
         self.speedTestServ = ownSpeedTest(0, "Server SpeedTest", 1)
         self.speedTestServ.start()
@@ -64,49 +66,45 @@ class gwDsahboardFrame(wx.Frame):
 #-----------------------------------------------------------------------------
     def _buidUISizer(self):
         """ Build the main UI Sizer. """
-        flagsR = wx.RIGHT
+        flagsR, fColour  = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200,200,200)
         mSizer = wx.BoxSizer(wx.VERTICAL)
         mSizer.AddSpacer(5)
-        # title line
-        
-        tbox = wx.BoxSizer(wx.HORIZONTAL)
-        tbox.AddSpacer(5)
-        tbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
-        tbox.AddSpacer(20)
-        titleT = wx.StaticText(self, label=" Quantum Safe Gateway Dashboard (Beta V1.0) ")
-        titleT.SetFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD))
-        titleT.SetForegroundColour(wx.Colour(200,200,200))
-        tbox.Add(titleT, flag=flagsR, border=2)
-        mSizer.Add(tbox, flag=flagsR, border=2)
-        self._addSplitLine(mSizer, wx.LI_HORIZONTAL, 1900)
 
-        # Row Idx 0: colum 0 - bashboad server information and gateway table.
+        # Row Idx 0 : title line 
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.AddSpacer(5)
+        hbox0.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)), flag=flagsR, border=2)
+        hbox0.AddSpacer(20)
+        titleT = wx.StaticText(self, label=" Quantum Safe Gateway Dashboard (Beta V1.0) ")
+        titleT.SetFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD))
+        titleT.SetForegroundColour(fColour)
+        hbox0.Add(titleT, flag=flagsR, border=2)
+        mSizer.Add(hbox0, flag=flagsR, border=2)
+        self._addSplitLine(mSizer, wx.LI_HORIZONTAL, 1900)
+
+        # Row Idx 1: colum 0 - bashboad server information and gateway table.
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox1.AddSpacer(5)
         ownInfoSzer = self._buildOwnInfoSizerWin(wx.VERTICAL) if gv.WIN_SYS else self._buildOwnInfoSizerLinux(wx.VERTICAL)
-        hbox0.Add(ownInfoSzer, flag=flagsR, border=2)
-
+        hbox1.Add(ownInfoSzer, flag=flagsR, border=2)
         # split line
-        hbox0.AddSpacer(5)
-        lineLen = 245 if gv.WIN_SYS else 205
-        hbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, lineLen),
-                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
-        hbox0.AddSpacer(5)
-        
-        vbox1 = wx.BoxSizer(wx.VERTICAL)
+        self._addSplitLine(hbox1, wx.LI_VERTICAL, 205)
 
+        #Row Idx 1: colum 1
+        vbox1 = wx.BoxSizer(wx.VERTICAL)
         gwLabel = wx.StaticText(self, label=" Deployed Gateway Information ")
         gwLabel.SetFont(gv.iTitleFont)
-        gwLabel.SetForegroundColour(wx.Colour(200,200,200))
+        gwLabel.SetForegroundColour(fColour)
         vbox1.Add(gwLabel, flag=flagsR, border=2)
         vbox1.AddSpacer(10)
 
         #  Row Idx 0: colum 1 - Deployed Gateway information.
         gv.iGWTablePanel = self.ownInfoPanel = gp.PanelGwInfo(self)
         vbox1.Add(self.ownInfoPanel, flag=flagsR, border=2)
-        hbox0.Add(vbox1, flag=flagsR, border=2)
+        hbox1.AddSpacer(5)
+        hbox1.Add(vbox1, flag=flagsR, border=2)
 
-        mSizer.Add(hbox0, flag=flagsR, border=2)
+        mSizer.Add(hbox1, flag=flagsR, border=2)
         # split line
         self._addSplitLine(mSizer, wx.LI_HORIZONTAL, 1900)
 
@@ -278,17 +276,19 @@ class gwDsahboardFrame(wx.Frame):
 
                 #gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
             # Check the tls json file.
-            self.checkTLSRpt()
+            #self.checkTLSRpt()
 
             if gv.iSelectedGW:
                 dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
-                self.chartPanel.updateData(dataDict['Data'])
-                self.chartPanel.updateDisplay()
+                gv.iChartsPanel.updateData(dataDict['Data'])
+                #self.chartPanel.updateDisplay()
+
                 self.updateGateWayInfo(False)
                 
             self.ownInfoPanel.updateGridState()
             self.lastPeriodicTime = now
 
+        if gv.iChartsPanel: gv.iChartsPanel.updateDisplay()
 
 #-----------------------------------------------------------------------------
     def updateOwnInfo(self, dataKey, args):
@@ -357,9 +357,9 @@ class gwDsahboardFrame(wx.Frame):
                         '8GB-DDR4 1333Hz',
                         str(datetime.fromtimestamp(int(dataSet['ReportT']))))
             for k, label in enumerate(datalist):
-                self.gwInfoLbs[k].SetLabel(str(label))
+                self.gwPanel.gwInfoLbs[k].SetLabel(str(label))
         else:
-            self.gwInfoLbs[-1].SetLabel(str(datetime.fromtimestamp(int(dataSet['ReportT']))))
+            self.gwPanel.gwInfoLbs[-1].SetLabel(str(datetime.fromtimestamp(int(dataSet['ReportT']))))
 
 #-----------------------------------------------------------------------------
     def onClose(self, event):
@@ -381,35 +381,33 @@ class PanelGwData(wx.Panel):
         """ Build the gate information sizer."""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         mSizer = wx.BoxSizer(wx.HORIZONTAL)
-
+        
         vSizer = wx.BoxSizer(wx.VERTICAL)
-        #self.gwtitleLb = wx.StaticText(self, label=" Gateway Detail Information ")
-        #self.gwtitleLb.SetFont(gv.iTitleFont)
-        #self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
-        #vSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
+
         vSizer.AddSpacer(10)
-        gwILbs =(' GateWay ID :', ' IP Address :',  ' CPU Info :', ' RAM Info :', ' UpdateTime:' ,)
+        gwILbs =(' GateWay ID :', ' IP Address :',  ' CPU Info :', ' RAM Info :', ' UpdateTime:')
         bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.VERTICAL," GateWay Computer Information ", gwILbs, (400, 300))
         vSizer.Add(bsizer1, flag=flagsR, border=2)
-        vSizer.AddSpacer(5)
-        vSizer.Add(self._buildGwCtrlBox(), flag=flagsR, border=2)
+
         vSizer.AddSpacer(10)
-
-
+        vSizer.Add(self._buildGwCtrlBox(), flag=flagsR, border=2)
+        
+        vSizer.AddSpacer(10)
         vSizer.Add(self._buildTlsCtrlBox(), flag=flagsR, border=2)
 
 
         
         vSizer.AddSpacer(10)
-        vSizer.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
-        
+        #vSizer.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         mSizer.Add(vSizer, flag=flagsR, border=2)
 
+        mSizer.AddSpacer(5)
         mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 700),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
         mSizer.AddSpacer(5)
-        self.chartPanel = gp.ChartDisplayPanelWin(self) if gv.WIN_SYS else gp.ChartDisplayPanelLinux(self)
-        mSizer.Add(self.chartPanel, flag=flagsR, border=2)
+
+        gv.iChartsPanel = gp.ChartDisplayPanelWin(self) if gv.WIN_SYS else gp.ChartDisplayPanelLinux(self)
+        mSizer.Add(gv.iChartsPanel, flag=flagsR, border=2)
         return mSizer
 
 
@@ -417,19 +415,15 @@ class PanelGwData(wx.Panel):
         """ build the gateway control box.
         """
         flagsR, tColour = wx.LEFT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200, 200, 200)
-        outBox = wx.StaticBox(self, -1, label='TLS Connection', size=(400, 200))
+        outBox = wx.StaticBox(self, -1, label=' TLS Connection ', size=(400, 200))
         outBox.SetForegroundColour(tColour)
         outBox.SetBackgroundColour(gv.iWeidgeClr)
-        bsizer = wx.StaticBoxSizer(outBox, wx.VERTICAL)
-
+        vbox = wx.StaticBoxSizer(outBox, wx.VERTICAL)
         self.tlsTF = wx.TextCtrl(outBox, size=(370, 350), style=wx.TE_MULTILINE)
-        bsizer.Add(self.tlsTF, flag=flagsR, border=2)
+        vbox.Add(self.tlsTF, flag=flagsR, border=2)
         self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
-
-        bsizer.AddSpacer(3)
-        return bsizer
-
-
+        vbox.AddSpacer(3)
+        return vbox
 
     def _buildGwCtrlBox(self):
         """ build the gateway control box.
@@ -438,26 +432,26 @@ class PanelGwData(wx.Panel):
         outBox = wx.StaticBox(self, -1, label='Gateway Control', size=(400, 200))
         outBox.SetForegroundColour(tColour)
         outBox.SetBackgroundColour(gv.iWeidgeClr)
-        bsizer = wx.StaticBoxSizer(outBox, wx.VERTICAL)
+        vbox = wx.StaticBoxSizer(outBox, wx.VERTICAL)
 
         self.tlsCB = wx.CheckBox(outBox, label = ' Enable Gateway TLS Quantum Safty Check') 
         self.tlsCB.SetForegroundColour(tColour)
         self.tlsCB.SetValue(True)
-        bsizer.Add(self.tlsCB, flag=wx.EXPAND, border=2)
-        bsizer.AddSpacer(5)
+        vbox.Add(self.tlsCB, flag=wx.EXPAND, border=2)
+        vbox.AddSpacer(5)
+
         self.crypCB = wx.CheckBox(outBox, label = ' Enable Gateway Quantum Encryption Function') 
         self.crypCB.SetForegroundColour(tColour)
         self.crypCB.SetValue(True)
-        bsizer.Add(self.crypCB, flag=wx.EXPAND, border=2)
-        bsizer.AddSpacer(5)
+        vbox.Add(self.crypCB, flag=wx.EXPAND, border=2)
+        vbox.AddSpacer(5)
+
         self.mapCB = wx.CheckBox(outBox, label = ' Show Gateway GPS position on Google Map') 
         self.mapCB.SetForegroundColour(tColour)
         self.mapCB.SetValue(True)
-        bsizer.Add(self.mapCB, flag=wx.EXPAND, border=2)
-        bsizer.AddSpacer(3)
-        return bsizer
-
-
+        vbox.Add(self.mapCB, flag=wx.EXPAND, border=2)
+        vbox.AddSpacer(3)
+        return vbox
 
     #-----------------------------------------------------------------------------
     def _buildStateInfoBox(self, layout, mainLabel, subLabels, bSize):
@@ -529,6 +523,7 @@ class GWDataMgr(object):
         dataVal = {
             'Idx':      self.gwCount, 
             'IpMac':    ipStr,
+            'qcrypt':   'Disabled',
             'version':  version,
             'pdpkVer':  (dpdk_v, dpdk_c, dpdk_e),
             'keyExch':  keyE,
@@ -628,11 +623,13 @@ class GWReportServ(threading.Thread):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(gv.SE_IP)
         self.recvMsg = None
+        #self.terminate = True
 
     def run(self):
         """ main loop to handle the data feed back."""
         while not self.terminate:
-            data, _ = self.sock.recvfrom(2048) 
+            data, _ = self.sock.recvfrom(2048)
+            print('xxxxxxxx')
             if not data: break
             if isinstance(data, bytes):
                 self.recvMsg = data.decode(encoding="utf-8")

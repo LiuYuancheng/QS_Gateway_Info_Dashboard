@@ -45,3 +45,4 @@ iTitleFont = None
 iWeidgeClr = None
 iMasterMode = False  # execution mode.
 iGWTablePanel = None   # panel to do the control
+iChartsPanel = None

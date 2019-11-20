@@ -9,6 +9,10 @@ SEV_IP = ('0.0.0.0', 5005)
 GW_IN_JSON = 'tp01_in_info.json'
 GW_OUT_JSON = 'tp01_out_info.json'
 
+#GW_IN_JSON = 'income.json'
+#GW_OUT_JSON = 'outcome.json'
+
+
 def main():
     gwClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     print("load the configure file")
@@ -54,6 +58,8 @@ def main():
                         str(random2["throughput_mbps"]),
                         str(random1["percent_enc"]),
                         str(random2["percent_enc"]) ))
+                        #str(random1["citpercent_ency"]),
+                        #str(random2["citpercent_ency"]) ))
         print("msg: %s" % msg)
         gwClient.sendto(msg.encode('utf-8'), ("127.0.0.1", SEV_IP[1]))
 

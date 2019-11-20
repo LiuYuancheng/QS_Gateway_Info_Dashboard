@@ -88,24 +88,6 @@ class PanelGwInfo(wx.Panel):
         mSizer.AddSpacer(5)
         return mSizer
 
-        # Row idx 2: Display active.
-        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox1.Add(wx.StaticText(self, label=" Selected GateWay: "), flag=flagsR, border=2)
-        self.selGwlb = wx.StaticText(self, label=" GateWay ID - [] - offline ")
-        hbox1.Add(self.selGwlb, flag=flagsR, border=2)
-        hbox1.AddSpacer(50)
-        self.displayAcBt = wx.Button(self, label=' Show Gateway ')
-        self.displayAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
-        hbox1.Add(self.displayAcBt, flag=flagsR, border=2)
-        hbox1.AddSpacer(10)
-        if gv.iSimuMode:
-            self.tlsSmuBt = wx.Button(self, label=' TLS simulation ')
-            self.tlsSmuBt.Bind(wx.EVT_BUTTON, self.updateNewTls)
-            hbox1.Add(self.tlsSmuBt, flag=flagsR, border=2)
-
-        mSizer.Add(hbox1, flag=flagsR, border=2)
-        return mSizer
-
 #-----------------------------------------------------------------------------
     def addToGrid(self, dataID, dataDict):
         """ Add a new data in the grid."""
@@ -113,7 +95,7 @@ class PanelGwInfo(wx.Panel):
         dataSequence = (str(dataID),
                         str(dataDict['IpMac']),
                         str(dataDict['version']),
-                        set(dataDict['qcrypt']),
+                        str(dataDict['qcrypt']),
                         str(dataDict['pdpkVer'][0]),
                         str(dataDict['pdpkVer'][1]),
                         str(dataDict['pdpkVer'][2]),
@@ -288,7 +270,8 @@ class PanelChart(wx.Panel):
         zx, zy = 40, h-40
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText('Peak Value: [ %s ]' %str(self.data[-1]), w-150, 5)
+        dc.DrawText('Peak Value: [ %s ]' %str(max(self.data)), w-150, 5)
+
         dc.DrawText('Current Value[ %s ]' %str(self.data[-1]), w-150, 20)
 
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
@@ -297,7 +280,7 @@ class PanelChart(wx.Panel):
         (r, g, b),  alph = self.lColor, 128 # half transparent alph
         gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
         delta, scale = offsetX*9//self.recNum, self.axisRng[1]
-        poligon =[(zx, zy+1)]+[(zx+i*delta, int( zy- min(self.data[i]/scale, 10)*offsetY)) for i in range(self.recNum)]+[(offsetX*10, zy+1)]
+        poligon =[(zx, zy+1)]+[(zx+i*delta, int( zy- min(self.data[i]/scale, 10)*offsetY)) for i in range(self.recNum)]+[(zx + offsetX*9, zy+1)]
         gdc.DrawPolygon(poligon)
 
 #--PanelChart--------------------------------------------------------------------
@@ -370,17 +353,27 @@ class ChartDisplayPanelLinux(wx.Panel):
 
 
         
-        self.downPanel = PanelChart(self, recNum=80)
+        self.downPanel = PanelChart(self, recNum=80, axisRng=(10, 50))
         gs.Add(self.downPanel,flag=flagsR, border=2)
         self.downPanel.setChartCmt(' ', 'Mbps',(200, 0, 0))
 
-        self.uploadPanel = PanelChart(self, recNum=80)
+        self.uploadPanel = PanelChart(self, recNum=80, axisRng=(10, 50))
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
         self.uploadPanel.setChartCmt(' ', 'Mbps',(82, 153, 85))
 
-        gs.AddSpacer(20)
+        #gs.AddSpacer(20)
         #self.piePanel = PanelPieChart(self)
         #gs.Add(self.piePanel,flag=flagsR, border=2)
+        # > 
+        progress_pie = PC.ProgressPie(self, 100, 50, -1, wx.DefaultPosition,
+                                      wx.Size(180, 200), wx.SIMPLE_BORDER)
+        progress_pie.SetBackColour(wx.Colour(18, 86, 133))
+        progress_pie.SetFilledColour(wx.Colour(200, 50, 50))
+        progress_pie.SetUnfilledColour(wx.Colour(50, 200, 50))
+        progress_pie.SetHeight(5)
+        gs.Add(progress_pie,flag=flagsR, border=2)
+
+        progress_pie.SetValue(50)
 
 
 
