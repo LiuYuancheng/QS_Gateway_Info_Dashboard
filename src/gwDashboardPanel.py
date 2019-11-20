@@ -12,8 +12,11 @@
 #-----------------------------------------------------------------------------
 import wx
 import time
+import random
 import wx.grid
 import wx.lib.sized_controls as sc
+import wx.lib.agw.piectrl as PC
+
 from datetime import datetime
 
 import gwDashboardGobal as gv
@@ -162,6 +165,48 @@ class PanelGwInfo(wx.Panel):
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour((0, 255, 0)))
             self.grid.SetCellValue(idx, self.collumNum-1 , str(datetime.fromtimestamp(int(rpTime))))
 
+
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelPieChart(wx.Panel):
+    """ chart to display data based on time.
+    """
+    def __init__(self, parent, pnlSize=(320, 320)):
+        wx.Panel.__init__(self, parent, size=pnlSize)
+        self.SetBackgroundColour(wx.Colour(18, 86, 133))
+
+    
+        mSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mypie = PC.PieCtrl(self, -1, wx.DefaultPosition, wx.Size(180,270))
+        self.mypie.SetBackColour(wx.Colour(150, 200, 255))
+        
+        self.part1 = PC.PiePart()
+        self.part1.SetLabel("Average: 1")
+        self.part1.SetValue(12)
+        self.part1.SetColour(wx.Colour(0, 205, 52))
+        self.mypie._series.append(self.part1)
+
+        self.part2 = PC.PiePart()
+        self.part2.SetLabel("Label 2")
+        self.part2.SetValue(100-12)
+        self.part2.SetColour(wx.Colour(83, 81, 251))
+        self.mypie._series.append(self.part2)
+
+        mSizer.Add(self.mypie, 1, wx.EXPAND | wx.ALL, 5)
+        self.Layout()
+        self.SetSizer(mSizer)
+        #self.SetDoubleBuffered(True)
+
+    def updatePieVals(self):
+        a= random.randint(1,100)
+        self.part1.SetValue(a)
+        self.part1.SetLabel('data %s' %str(a))
+        b = 100 -a 
+        self.part1.SetValue(b)
+        self.part1.SetLabel('data %s' %str(b))
+        #self.Refresh(False)
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
@@ -295,7 +340,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         mSizer = wx.BoxSizer(wx.VERTICAL)
         mSizer.AddSpacer(5)
         titleFont = wx.Font(10, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)
-        gs = wx.FlexGridSizer(4, 2, 5, 5)
+        gs = wx.FlexGridSizer(4, 3, 5, 5)
         
         itsLb = wx.StaticText(self, label=' Incoming Throughput Speed ')
         itsLb.SetFont(titleFont)
@@ -312,6 +357,18 @@ class ChartDisplayPanelLinux(wx.Panel):
                     Gate way average incoming data packed speed.\n \
                     unit:Mbps")
         gs.Add(otsLb,flag=flagsR, border=2)
+
+
+        ctsLb = wx.StaticText(self, label=' Average Throughput Speed ')
+        ctsLb.SetFont(titleFont)
+        ctsLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        ctsLb.SetToolTip("Data helper string: \n \
+                    Gate way average incoming data packed speed.\n \
+                    unit:Mbps")
+        gs.Add(ctsLb,flag=flagsR, border=2)
+
+
+
         
         self.downPanel = PanelChart(self, recNum=80)
         gs.Add(self.downPanel,flag=flagsR, border=2)
@@ -321,7 +378,12 @@ class ChartDisplayPanelLinux(wx.Panel):
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
         self.uploadPanel.setChartCmt(' ', 'Mbps',(82, 153, 85))
 
-        
+        gs.AddSpacer(20)
+        #self.piePanel = PanelPieChart(self)
+        #gs.Add(self.piePanel,flag=flagsR, border=2)
+
+
+
         ipepLb = wx.StaticText(self, label=' Percentage of TLS Packets')
         ipepLb.SetFont(titleFont)
         ipepLb.SetForegroundColour(wx.Colour(200, 210, 200))
@@ -339,6 +401,17 @@ class ChartDisplayPanelLinux(wx.Panel):
             unit:Mbps")
         gs.Add(opepLb,flag=flagsR, border=2)
         
+
+        cpepLb = wx.StaticText(self, label=' Percentage of packets protected by gateway (Selective Encryption)')
+        cpepLb.SetFont(titleFont)
+        cpepLb.SetForegroundColour(wx.Colour(200, 210, 200))
+        cpepLb.SetToolTip("Data helper string: \n \
+            Gate way average incoming data packed speed.\n \
+            unit:Mbps")
+        gs.Add(cpepLb,flag=flagsR, border=2)
+
+
+
         self.throuthPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
         self.throuthPanel.setChartCmt(' ', '   %',(0, 0, 200))
@@ -348,6 +421,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         self.percetPanel.setChartCmt(' ', '   %', (120, 120, 120))
         mSizer.Add(gs, flag=flagsR, border=2)
         mSizer.AddSpacer(50)
+        mSizer.Layout()
         return mSizer
     
     def updateData(self, dataList):

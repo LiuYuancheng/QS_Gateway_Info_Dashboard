@@ -339,6 +339,7 @@ class gwDsahboardFrame(wx.Frame):
         """ Update the data in the detail text field. Input 'None' will clear the 
             detail information text field.
         """
+        return
         if data is None:
             self.tlsTF.Clear()
         else:
@@ -373,6 +374,7 @@ class PanelGwData(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(gv.iWeidgeClr)
         self.SetSizer(self._buildGatewaySizer())
+        self.SetDoubleBuffered(True)
 
     #-----------------------------------------------------------------------------
     def _buildGatewaySizer(self):
