@@ -240,7 +240,7 @@ class PanelChart(wx.Panel):
         dc.SetFont(font)
         dc.DrawText(self.title, 200, 5)
         font.SetPointSize(8)
-        dc.SetFont(font)
+        dc.SetFont(wx.Font(8, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD))
 
 
         # Draw Axis and Grids:(Y-people count X-time)
