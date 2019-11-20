@@ -59,6 +59,7 @@ class gwDsahboardFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.SetDoubleBuffered(True)
     
+        self.Maximize(True)
 
 #-----------------------------------------------------------------------------
     def _buidUISizer(self):
@@ -107,10 +108,14 @@ class gwDsahboardFrame(wx.Frame):
 
         mSizer.Add(hbox0, flag=flagsR, border=2)
         # split line
-        mSizer.AddSpacer(5)
-        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(1530, -1),
-                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        mSizer.AddSpacer(5)
+        self._addSplitLine(mSizer, wx.LI_HORIZONTAL, 1900)
+
+        gwDetailLb = wx.StaticText(self, label=" Gateway Detail Information ")
+        gwDetailLb.SetFont(gv.iTitleFont)
+        gwDetailLb.SetForegroundColour(wx.Colour(200,200,200))
+        mSizer.Add(gwDetailLb, flag=flagsR, border=2)
+        mSizer.AddSpacer(10)
+
         # Row Idx 1: gateway display area.
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         hbox2.AddSpacer(5)
@@ -373,40 +378,84 @@ class PanelGwData(wx.Panel):
     def _buildGatewaySizer(self):
         """ Build the gate information sizer."""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        mSizer = wx.BoxSizer(wx.HORIZONTAL)
+
         vSizer = wx.BoxSizer(wx.VERTICAL)
-        self.gwtitleLb = wx.StaticText(self, label=" Gateway Detail Information ")
-        self.gwtitleLb.SetFont(gv.iTitleFont)
-        self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
-        vSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
-        #vSizer.AddSpacer(5)
-        #self.gwHardwareLb = wx.StaticText(self, label="[ Own_00: CPU-Intel(R) Core(TM) i7-8700 @3.2GHz, RAM-8GB ]")
-        #self.gwHardwareLb.SetForegroundColour(wx.Colour(200,200,200))
+        #self.gwtitleLb = wx.StaticText(self, label=" Gateway Detail Information ")
+        #self.gwtitleLb.SetFont(gv.iTitleFont)
+        #self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
+        #vSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
         vSizer.AddSpacer(10)
-        #vSizer.Add(self.gwHardwareLb, flag=wx.ALIGN_BOTTOM, border=2)
-        vSizer.AddSpacer(5)
         gwILbs =(' GateWay ID :', ' IP Address :',  ' CPU Info :', ' RAM Info :', ' UpdateTime:' ,)
         bsizer1, self.gwInfoLbs = self._buildStateInfoBox(wx.VERTICAL," GateWay Computer Information ", gwILbs, (400, 300))
         vSizer.Add(bsizer1, flag=flagsR, border=2)
         vSizer.AddSpacer(5)
-        self.tlsConnLb = wx.StaticText(self, label=" TLS Connection : ")
-        self.tlsConnLb.SetForegroundColour(wx.Colour(200,200,200))
-        vSizer.Add(self.tlsConnLb, flag=flagsR, border=2)
-        vSizer.AddSpacer(5)
-        self.tlsTF = wx.TextCtrl(self, size=(400, 250), style=wx.TE_MULTILINE)
-        vSizer.Add(self.tlsTF, flag=flagsR, border=2)
-        self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
-        vSizer.AddSpacer(5)
+        vSizer.Add(self._buildGwCtrlBox(), flag=flagsR, border=2)
+        vSizer.AddSpacer(10)
+
+
+        vSizer.Add(self._buildTlsCtrlBox(), flag=flagsR, border=2)
+
+
+        
+        vSizer.AddSpacer(10)
         vSizer.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         
-        hbox2.Add(vSizer, flag=flagsR, border=2)
+        mSizer.Add(vSizer, flag=flagsR, border=2)
 
-        hbox2.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 700),
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 700),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
-        hbox2.AddSpacer(5)
+        mSizer.AddSpacer(5)
         self.chartPanel = gp.ChartDisplayPanelWin(self) if gv.WIN_SYS else gp.ChartDisplayPanelLinux(self)
-        hbox2.Add(self.chartPanel, flag=flagsR, border=2)
-        return hbox2
+        mSizer.Add(self.chartPanel, flag=flagsR, border=2)
+        return mSizer
+
+
+    def _buildTlsCtrlBox(self):
+        """ build the gateway control box.
+        """
+        flagsR, tColour = wx.LEFT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200, 200, 200)
+        outBox = wx.StaticBox(self, -1, label='TLS Connection', size=(400, 200))
+        outBox.SetForegroundColour(tColour)
+        outBox.SetBackgroundColour(gv.iWeidgeClr)
+        bsizer = wx.StaticBoxSizer(outBox, wx.VERTICAL)
+
+        self.tlsTF = wx.TextCtrl(outBox, size=(370, 350), style=wx.TE_MULTILINE)
+        bsizer.Add(self.tlsTF, flag=flagsR, border=2)
+        self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
+
+        bsizer.AddSpacer(3)
+        return bsizer
+
+
+
+    def _buildGwCtrlBox(self):
+        """ build the gateway control box.
+        """
+        flagsR, tColour = wx.LEFT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200, 200, 200)
+        outBox = wx.StaticBox(self, -1, label='Gateway Control', size=(400, 200))
+        outBox.SetForegroundColour(tColour)
+        outBox.SetBackgroundColour(gv.iWeidgeClr)
+        bsizer = wx.StaticBoxSizer(outBox, wx.VERTICAL)
+
+        self.tlsCB = wx.CheckBox(outBox, label = ' Enable Gateway TLS Quantum Safty Check') 
+        self.tlsCB.SetForegroundColour(tColour)
+        self.tlsCB.SetValue(True)
+        bsizer.Add(self.tlsCB, flag=wx.EXPAND, border=2)
+        bsizer.AddSpacer(5)
+        self.crypCB = wx.CheckBox(outBox, label = ' Enable Gateway Quantum Encryption Function') 
+        self.crypCB.SetForegroundColour(tColour)
+        self.crypCB.SetValue(True)
+        bsizer.Add(self.crypCB, flag=wx.EXPAND, border=2)
+        bsizer.AddSpacer(5)
+        self.mapCB = wx.CheckBox(outBox, label = ' Show Gateway GPS position on Google Map') 
+        self.mapCB.SetForegroundColour(tColour)
+        self.mapCB.SetValue(True)
+        bsizer.Add(self.mapCB, flag=wx.EXPAND, border=2)
+        bsizer.AddSpacer(3)
+        return bsizer
+
+
 
     #-----------------------------------------------------------------------------
     def _buildStateInfoBox(self, layout, mainLabel, subLabels, bSize):
@@ -440,6 +489,10 @@ class PanelGwData(wx.Panel):
         bsizer.Add(gs, flag=wx.EXPAND, border=2)
         bsizer.AddSpacer(3)
         return (bsizer, valueLblist)
+
+
+
+
 
 
 

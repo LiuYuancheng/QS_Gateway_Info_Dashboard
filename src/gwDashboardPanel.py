@@ -284,7 +284,7 @@ class ChartDisplayPanelLinux(wx.Panel):
     """
     def __init__(self, parent):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(1120, 700))
+        wx.Panel.__init__(self, parent)
         #self.SetBackgroundColour(wx.Colour(200, 210, 210))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetSizer(self._buidUISizer())
