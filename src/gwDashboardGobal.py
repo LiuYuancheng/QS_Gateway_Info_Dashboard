@@ -23,7 +23,14 @@ WIN_SYS = False
 IMG_FD = 'img'
 ICO_PATH = os.path.join(dirpath, IMG_FD, "gwIcon.ico")
 NWSAM_PATH = os.path.join(dirpath, IMG_FD, "networkSample.png")
-LOGO_PATH = os.path.join(dirpath, IMG_FD, "logo.jpg")
+LOGO_PATH = os.path.join(dirpath, IMG_FD, "logo2.png")
+
+GWOL_PATH = os.path.join(dirpath, IMG_FD, "gwOnline.png")
+GWDE_PATH = os.path.join(dirpath, IMG_FD, "gwDelay.png")
+GWFL_PATH = os.path.join(dirpath, IMG_FD, "gwoffline.png")
+GWQE_PATH = os.path.join(dirpath, IMG_FD, "gwqenable.png")
+GWQD_PATH = os.path.join(dirpath, IMG_FD, "qsdisable.png")
+
 
 # dashboard own UDP server IP address.
 SE_IP = ('0.0.0.0', 5005)       # Sensor server IP
@@ -35,5 +42,6 @@ iDataMgr = None
 iOwnID = 'Own_00'
 iSelectedGW = None  # selected gateway ID
 iTitleFont = None
+iWeidgeClr = None
 iMasterMode = False  # execution mode.
 iGWTablePanel = None   # panel to do the control

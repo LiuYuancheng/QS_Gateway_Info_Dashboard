@@ -24,42 +24,56 @@ class PanelGwInfo(wx.Panel):
     """ gateway information."""
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        self.SetBackgroundColour(gv.iWeidgeClr)
         self.selectedID = ''    # selected ID by User.
-        self.toggle = False         # delay toggle flag.
         self.SetSizer(self._buidUISizer())
 
 #-----------------------------------------------------------------------------
     def _buidUISizer(self):
         """ Build the panel's main UI Sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        mSizer = wx.BoxSizer(wx.VERTICAL)
+        flagsR, tColour = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200, 200, 200)
+        mSizer = wx.BoxSizer(wx.HORIZONTAL)
         # Row idx 0: gateway title line.
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.gwLabel = wx.StaticText(self, label=" Deployed Gateway Information ")
-        self.gwLabel.SetFont(gv.iTitleFont)
-        hbox.Add(self.gwLabel, flag=flagsR, border=2)
-        hbox.AddSpacer(30)
+        #hbox = wx.BoxSizer(wx.HORIZONTAL)
+        #self.gwLabel = wx.StaticText(self, label=" Deployed Gateway Information ")
+        #self.gwLabel.SetFont(gv.iTitleFont)
+        #hbox.Add(self.gwLabel, flag=flagsR, border=2)
+        #hbox.AddSpacer(10)
         #self.gwStLb = wx.StaticText(self, label="[Online/Total]: 0/0")
         #hbox.Add(self.gwStLb, flag=wx.ALIGN_BOTTOM, border=2)
         #hbox.AddSpacer(20)
-        hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
-        mSizer.Add(hbox, flag=flagsR, border=2)
+        outBox = wx.StaticBox(self, -1, label="Gateway Counter", size=(200, 400))
+        outBox.SetForegroundColour(tColour)
+        outBox.SetBackgroundColour(gv.iWeidgeClr)
+        bsizer = wx.StaticBoxSizer(outBox, wx.HORIZONTAL)
+        gs = wx.FlexGridSizer(5, 2, 5, 5)
+        self.gwCounterLt = []
+        lableList = (gv.GWOL_PATH, gv.GWDE_PATH, gv.GWFL_PATH, gv.GWQE_PATH, gv.GWQD_PATH)
+        for i, val in enumerate(lableList):
+            gs.Add(wx.StaticBitmap(outBox, -1, wx.Bitmap(val, wx.BITMAP_TYPE_ANY)), flag=flagsR, border=2)
+            dataLb = wx.StaticText(outBox, label=' :  0 ')
+            dataLb.SetForegroundColour(tColour)
+            gs.Add(dataLb, flag=flagsR, border=2)
+            self.gwCounterLt.append(dataLb)
+        bsizer.Add(gs, flag=wx.EXPAND, border=2)
+        #hbox.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.NWSAM_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
+        mSizer.Add(bsizer, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
         # Row idx 1: Add the client connection grid.
-        self.rowNum = 8 if gv.WIN_SYS else 5
-        self.collumNum = 10
+        self.rowNum = 8 if gv.WIN_SYS else 7
+        self.collumNum = 11
         self.grid = wx.grid.Grid(self, -1)
         self.grid.CreateGrid(self.rowNum, self.collumNum)
         # Set the Grid size.
         self.grid.SetRowLabelSize(30)
-        lbList = ((100, 'Gateway ID'),
-                  (110, 'IP Address'),
-                  (90, 'GW Ver'),
+        lbList = ((120, 'Gateway ID'),
+                  (120, 'IP Address'),
+                  (150, 'Quantum Encryption'),
+                  (80, 'GW Ver'),
                   (90, 'DPDK Ver'),
-                  (90, 'Crypt Ver'),
+                  (90, 'Crypt Mod'),
                   (90, 'DPDK Enc'),
-                  (90, 'Key Exchange'),
+                  (100, 'Key Exchange'),
                   (120, 'GPS Position'),
                   (150, 'Login Time'),
                   (150, 'Last Report Time'))
@@ -69,6 +83,8 @@ class PanelGwInfo(wx.Panel):
         self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.onLeftClick)
         mSizer.Add(self.grid, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
+        return mSizer
+
         # Row idx 2: Display active.
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         hbox1.Add(wx.StaticText(self, label=" Selected GateWay: "), flag=flagsR, border=2)
@@ -94,6 +110,7 @@ class PanelGwInfo(wx.Panel):
         dataSequence = (str(dataID),
                         str(dataDict['IpMac']),
                         str(dataDict['version']),
+                        set(dataDict['qcrypt']),
                         str(dataDict['pdpkVer'][0]),
                         str(dataDict['pdpkVer'][1]),
                         str(dataDict['pdpkVer'][2]),
@@ -114,9 +131,10 @@ class PanelGwInfo(wx.Panel):
         if row_index >= 0:
             self.grid.SelectRow(row_index)  # High light the row.
             dataId = self.grid.GetCellValue(row_index, 0)
-            dataIp = self.grid.GetCellValue(row_index, 1)
-            if dataId: self.selGwlb.SetLabel(dataId+' [ '+dataIp+' ]')
-            self.selectedID = dataId
+            if dataId != '':
+                print("123")
+                gv.iSelectedGW = dataId
+                gv.iMainFrame.updateGateWayInfo(True)
 
 #-----------------------------------------------------------------------------
     def onShowGw(self, event):
@@ -139,11 +157,7 @@ class PanelGwInfo(wx.Panel):
             if  deltT > 10:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
             elif 5 < deltT <= 10:
-                if self.toggle:
                     self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('YELLOW'))
-                else:
-                    self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
-                self.toggle = not self.toggle
             else:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour((0, 255, 0)))
             self.grid.SetCellValue(idx, self.collumNum-1 , str(datetime.fromtimestamp(int(rpTime))))
@@ -355,7 +369,7 @@ class ChartDisplayPanelWin(sc.SizedScrolledPanel):
     #----------------------------------------------------------------------
     def __init__(self, parent):
         """Constructor"""
-        sc.SizedScrolledPanel.__init__(self, parent, size=(1120, 700))
+        sc.SizedScrolledPanel.__init__(self, parent, size=(1220, 750))
         self.SetBackgroundColour(wx.Colour(200, 210, 210))
         #self.SetBackgroundColour(wx.Colour(18, 86, 133))
         self.SetSizer(self._buidUISizer())
