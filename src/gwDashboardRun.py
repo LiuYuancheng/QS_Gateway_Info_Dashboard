@@ -105,7 +105,7 @@ class gwDsahboardFrame(wx.Frame):
         """ Build the gate information sizer."""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vSizer = wx.BoxSizer(wx.VERTICAL)
-        self.gwtitleLb = wx.StaticText(self, label=" GateWay Detail Inforamtion ")
+        self.gwtitleLb = wx.StaticText(self, label=" Gateway Detail Information ")
         self.gwtitleLb.SetFont(gv.iTitleFont)
         self.gwtitleLb.SetForegroundColour(wx.Colour(200,200,200))
         vSizer.Add(self.gwtitleLb, flag=flagsR, border=2)
@@ -176,7 +176,7 @@ class gwDsahboardFrame(wx.Frame):
         ownILbs = (' IP Address :',
                    ' Running Mode :',
                    ' GPS Position :',
-                   ' UPD Host : ',
+                   ' UDP Host : ',
                    ' ISP Information :',
                    ' Server Start Time :', 
                    ' Total Gateway Reported :')
@@ -296,14 +296,14 @@ class gwDsahboardFrame(wx.Frame):
     def checkTLSRpt(self):
         """ read the json file to get the TLS data."""
         tlsDict = None
-        with open('tlsRecord.json', "r") as fh:
+        with open('tls01_info.json', "r") as fh:
             lines = fh.readlines()
             line = lines[-1].rstrip()
             tlsDict = json.loads(line)
         
         if self.tlsTimeStr != tlsDict['Time']:
             self.tlsTimeStr = tlsDict['Time']
-            self.appendTlsInfo((tlsDict['Src IP address'], tlsDict['Dest IP address'], tlsDict['TLS Version'], tlsDict['TLS Cipher Suite']))
+            self.appendTlsInfo((tlsDict['Src_IP_address'], tlsDict['Dest_IP_address'], tlsDict['TLS_Version'], tlsDict['TLS_Cipher_Suite']))
 
 
     def appendTlsInfo(self, tlsList):
@@ -390,6 +390,7 @@ class GWDataMgr(object):
         self.dataDict[gwID] = dataVal
         self.gwCount += 1
         gv.iGWTablePanel.addToGrid(gwID, dataVal)
+        #self.ownInfoLbs[-1].SetLabel(str(self.gwCount))
         return True
 
 #-----------------------------------------------------------------------------

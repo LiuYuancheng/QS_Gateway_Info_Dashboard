@@ -79,9 +79,10 @@ class PanelGwInfo(wx.Panel):
         self.displayAcBt.Bind(wx.EVT_BUTTON, self.onShowGw)
         hbox1.Add(self.displayAcBt, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
-        self.tlsSmuBt = wx.Button(self, label=' TLS simulation ')
-        self.tlsSmuBt.Bind(wx.EVT_BUTTON, self.updateNewTls)
-        hbox1.Add(self.tlsSmuBt, flag=flagsR, border=2)
+        if gv.iSimuMode:
+            self.tlsSmuBt = wx.Button(self, label=' TLS simulation ')
+            self.tlsSmuBt.Bind(wx.EVT_BUTTON, self.updateNewTls)
+            hbox1.Add(self.tlsSmuBt, flag=flagsR, border=2)
 
         mSizer.Add(hbox1, flag=flagsR, border=2)
         return mSizer
@@ -307,7 +308,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         self.uploadPanel.setChartCmt(' ', 'Mbps',(82, 153, 85))
 
         
-        ipepLb = wx.StaticText(self, label=' Incoming Packet Encryption Percentage ')
+        ipepLb = wx.StaticText(self, label=' Percentage of TLS Packets')
         ipepLb.SetFont(titleFont)
         ipepLb.SetForegroundColour(wx.Colour(200, 210, 200))
         ipepLb.SetToolTip("Data helper string: \n \
@@ -316,10 +317,10 @@ class ChartDisplayPanelLinux(wx.Panel):
         gs.Add(ipepLb,flag=flagsR, border=2)
         
         
-        opepLb = wx.StaticText(self, label=' Outgoing Packet Encryption Percentage ')
+        opepLb = wx.StaticText(self, label=' Percentage of packets protected by gateway (Selective Encryption)')
         opepLb.SetFont(titleFont)
         opepLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        ipepLb.SetToolTip("Data helper string: \n \
+        opepLb.SetToolTip("Data helper string: \n \
             Gate way average incoming data packed speed.\n \
             unit:Mbps")
         gs.Add(opepLb,flag=flagsR, border=2)
