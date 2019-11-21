@@ -110,11 +110,11 @@ class gwDsahboardFrame(wx.Frame):
         # split line
         self._addSplitLine(mSizer, wx.LI_HORIZONTAL, 1900)
 
-        gwDetailLb = wx.StaticText(self, label=" Gateway Detail Information ")
-        gwDetailLb.SetFont(gv.iTitleFont)
-        gwDetailLb.SetForegroundColour(wx.Colour(200,200,200))
-        mSizer.Add(gwDetailLb, flag=flagsR, border=2)
-        mSizer.AddSpacer(10)
+        #gwDetailLb = wx.StaticText(self, label=" Gateway Detail Information ")
+        #gwDetailLb.SetFont(gv.iTitleFont)
+        #gwDetailLb.SetForegroundColour(wx.Colour(200,200,200))
+        #mSizer.Add(gwDetailLb, flag=flagsR, border=2)
+        #mSizer.AddSpacer(10)
 
         # Row Idx 1: gateway display area.
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -139,9 +139,6 @@ class gwDsahboardFrame(wx.Frame):
         pSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=lSize,
                                  style=lStyle), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=2)
         pSizer.AddSpacer(5)
-
-
-
 
 #-----------------------------------------------------------------------------
     def _buildOwnInfoSizerWin(self, layout):
@@ -338,6 +335,7 @@ class gwDsahboardFrame(wx.Frame):
                         str(datetime.fromtimestamp(int(dataSet['ReportT']))))
             for k, label in enumerate(datalist):
                 self.gwPanel.gwInfoLbs[k].SetLabel(str(label))
+            gv.iChartsPanel.updateMap(gv.iSelectedGW)
         else:
             self.gwPanel.gwInfoLbs[-1].SetLabel(str(datetime.fromtimestamp(int(dataSet['ReportT']))))
 
@@ -365,6 +363,11 @@ class PanelGwData(wx.Panel):
         mSizer = wx.BoxSizer(wx.HORIZONTAL)
         
         vSizer = wx.BoxSizer(wx.VERTICAL)
+        vSizer.AddSpacer(5)
+        gwDetailLb = wx.StaticText(self, label=" Gateway Detail Information ")
+        gwDetailLb.SetFont(gv.iTitleFont)
+        gwDetailLb.SetForegroundColour(wx.Colour(200,200,200))
+        vSizer.Add(gwDetailLb, flag=wx.RIGHT, border=2)
 
         vSizer.AddSpacer(10)
         gwILbs =(' GateWay ID :', ' IP Address :',  ' CPU Info :', ' RAM Info :', ' UpdateTime:')
@@ -376,10 +379,8 @@ class PanelGwData(wx.Panel):
         
         vSizer.AddSpacer(10)
         vSizer.Add(self._buildTlsCtrlBox(), flag=flagsR, border=2)
-
-
         
-        vSizer.AddSpacer(10)
+        vSizer.AddSpacer(70)
         #vSizer.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.LOGO_PATH, wx.BITMAP_TYPE_ANY)),flag=flagsR, border=2)
         mSizer.Add(vSizer, flag=flagsR, border=2)
 
@@ -390,6 +391,8 @@ class PanelGwData(wx.Panel):
 
         gv.iChartsPanel = gp.ChartDisplayPanelWin(self) if gv.WIN_SYS else gp.ChartDisplayPanelLinux(self)
         mSizer.Add(gv.iChartsPanel, flag=flagsR, border=2)
+
+
         return mSizer
 
 
@@ -495,9 +498,9 @@ class PanelGwData(wx.Panel):
             self.updateTlsDetail(val+str(tlsList[i]))
         
         if any(x in str(tlsList[i]) for x in ['AES', '128', 'ICDH', 'RSA', '3DES']):
-            self.updateTlsDetail(' Quantum Safe     : %s' %'Not Safe')
+            self.updateTlsDetail(' Quantum Safe     : %s' %'Yes')
         else:
-            self.updateTlsDetail(' Quantum Safe     : %s' %'Safe')
+            self.updateTlsDetail(' Quantum Safe     : %s' %'No')
 
         self.updateTlsDetail('--'*30)
         self.tlsCount += 1
