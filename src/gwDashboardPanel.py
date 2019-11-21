@@ -17,6 +17,8 @@ import wx.grid
 import wx.lib.sized_controls as sc
 import wx.lib.agw.piectrl as PC
 
+from statistics import mean
+
 from datetime import datetime
 
 import gwDashboardGobal as gv
@@ -162,10 +164,10 @@ class PanelGwInfo(wx.Panel):
                 if color == wx.Colour('RED'): of +=1
                 if color == wx.Colour('YELLOW'): de +=1
                 if color == wx.Colour((0, 255, 0)): on +=1
-                safeStr = self.grid.GetCellBackgroundColour(i, 2)
+                safeStr = self.grid.GetCellValue (i, 2)
                 if safeStr == 'Enabled': 
                     sa += 1
-                else:
+                elif safeStr == 'Disabled':
                     nc += 1
 
             self.gwCounterLt[0].SetLabel(' :  %s ' %str(on))
@@ -230,14 +232,14 @@ class PanelPieChart(wx.Panel):
         self.Layout()
         #self.SetDoubleBuffered(True)
 
-    def updatePieVals(self):
-        a= random.randint(1,100)
-        self.part1.SetValue(a)
-        self.part1.SetLabel('data %s' %str(a))
-        b = 100 -a 
-        self.part1.SetValue(b)
-        self.part1.SetLabel('data %s' %str(b))
-        #self.Refresh(False)
+    def updatePieVals(self, avg1, avg2):
+        self.label1.SetLabel(" [ "+ str(round(avg1, 2)) +"% ] ")
+        self.label2.SetLabel(" [ "+ str(round(avg2, 2)) +"% ] ")
+        self.progress_pie1.SetValue(int(avg1))
+        self.progress_pie2.SetValue(int(avg2))
+
+    def updateDisplay(self):
+        self.Refresh(False)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -445,7 +447,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         gs.Add(opepLb,flag=flagsR, border=2)
         
 
-        cpepLb = wx.StaticText(self, label=' Average Percentage Value in 1min ')
+        cpepLb = wx.StaticText(self, label=' Average Percentage Value in Last 90 Seconds ')
         cpepLb.SetFont(titleFont)
         cpepLb.SetForegroundColour(wx.Colour(200, 210, 200))
         cpepLb.SetToolTip("Data helper string: \n \
@@ -453,15 +455,13 @@ class ChartDisplayPanelLinux(wx.Panel):
             unit:Mbps")
         gs.Add(cpepLb,flag=flagsR, border=2)
 
-
-
         self.throuthPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
-        self.throuthPanel.setChartCmt(' ', '   %',(0, 0, 200))
+        self.throuthPanel.setChartCmt(' ', '   %',(83, 81, 251))
 
         self.percetPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.percetPanel,flag=flagsR, border=2)
-        self.percetPanel.setChartCmt(' ', '   %', (120, 120, 120))
+        self.percetPanel.setChartCmt(' ', '   %', (26, 205, 152))
 
         self.piePanel = PanelPieChart(self)
         gs.Add(self.piePanel,flag=flagsR, border=2)
@@ -477,13 +477,15 @@ class ChartDisplayPanelLinux(wx.Panel):
         self.uploadPanel.setData(dataList[1])
         self.throuthPanel.setData(dataList[2])
         self.percetPanel.setData(dataList[3])
+        self.piePanel.updatePieVals(mean(dataList[2]), mean(dataList[3]))
+
 
     def updateDisplay(self):
         self.downPanel.updateDisplay()
         self.uploadPanel.updateDisplay()
         self.throuthPanel.updateDisplay()
         self.percetPanel.updateDisplay()
-
+        self.piePanel.updateDisplay()
 
 class ChartDisplayPanelWin(sc.SizedScrolledPanel):
     """ chart display panel.
