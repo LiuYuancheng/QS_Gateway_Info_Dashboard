@@ -1,1 +1,1 @@
-{"gatewayID": "Demo_GW_00", "ipAddr": "138.75.53.189", "gwVer": "v1.1", "dpdk_v": "19.08", "dpdk_c": "Openssl", "dpdk_e": "AES-CBC 256", "keyE": "Custom", "GPS": "[1.2988,103.836]"}
+{"gatewayID": "Demo_GW_00", "ipAddr": "127.0.0.1", "gwVer": "v1.1", "dpdk_v": "19.08", "dpdk_c": "Openssl", "dpdk_e": "AES-CBC 256", "keyE": "Custom", "GPS": "[1.2988,103.836]"}
