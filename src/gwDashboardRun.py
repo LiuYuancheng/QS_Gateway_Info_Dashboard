@@ -18,6 +18,7 @@ import socket
 import json
 import threading
 import speedtest
+import webbrowser
 from datetime import datetime
 
 import gwDashboardGobal as gv
@@ -426,18 +427,25 @@ class PanelGwData(wx.Panel):
         self.tlsCB.SetForegroundColour(tColour)
         self.tlsCB.SetValue(True)
         vbox.Add(self.tlsCB, flag=wx.EXPAND, border=2)
+        #self.Bind(wx.EVT_CHECKBOX,self.ontlsCB)
         vbox.AddSpacer(5)
+        
+
 
         self.crypCB = wx.CheckBox(outBox, label = ' Enable Gateway Quantum Encryption Function') 
         self.crypCB.SetForegroundColour(tColour)
         self.crypCB.SetValue(True)
         vbox.Add(self.crypCB, flag=wx.EXPAND, border=2)
+        #self.Bind(wx.EVT_CHECKBOX,self.onMapCB)
         vbox.AddSpacer(5)
+        
+
 
         self.mapCB = wx.CheckBox(outBox, label = ' Show Gateway GPS position on Google Map') 
         self.mapCB.SetForegroundColour(tColour)
         self.mapCB.SetValue(True)
         vbox.Add(self.mapCB, flag=wx.EXPAND, border=2)
+        self.Bind(wx.EVT_CHECKBOX,self.onMapCB)
         vbox.AddSpacer(3)
         return vbox
 
@@ -504,10 +512,16 @@ class PanelGwData(wx.Panel):
         else:
             self.tlsTF.AppendText(" - %s \n" %str(data))
 
-
-
-
-
+    def onMapCB(self, event):
+        """ Creat the google map gps position marked url and open the url by the 
+            system default browser.
+        """
+        cb = event.GetEventObject()
+        if cb.GetLabel() == ' Show Gateway GPS position on Google Map' and self.mapCB.IsChecked():
+            url = "http://maps.google.com/maps?z=12&t=m&q=loc:" + \
+                str(1.2988)+"+"+str(103.836)
+            print(url)
+            webbrowser.open_new(url)
 
 
 #-----------------------------------------------------------------------------
@@ -645,7 +659,6 @@ class GWReportServ(threading.Thread):
         """ main loop to handle the data feed back."""
         while not self.terminate:
             data, _ = self.sock.recvfrom(2048)
-            print('xxxxxxxx')
             if not data: break
             if isinstance(data, bytes):
                 self.recvMsg = data.decode(encoding="utf-8")

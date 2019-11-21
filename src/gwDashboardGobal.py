@@ -36,6 +36,7 @@ PTGP_PATH = os.path.join(dirpath, IMG_FD, "pctLb2.png")
 
 # dashboard own UDP server IP address.
 SE_IP = ('0.0.0.0', 5005)       # Sensor server IP
+CT_IP = ('127.0.0.1', 5006)
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFrame = None
