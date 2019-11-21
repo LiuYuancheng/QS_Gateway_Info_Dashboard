@@ -353,7 +353,8 @@ class PanelGwData(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(gv.iWeidgeClr)
-        self.tlsCount = 0 
+        self.tlsCount = 0
+        self.gwClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.SetSizer(self._buildGatewaySizer())
         self.SetDoubleBuffered(True)
 
@@ -522,7 +523,13 @@ class PanelGwData(wx.Panel):
                 str(1.2988)+"+"+str(103.836)
             print(url)
             webbrowser.open_new(url)
-
+        if cb.GetLabel() == ' Enable Gateway Quantum Encryption Function':
+            msg = 'T;1' if self.tlsCB.IsChecked() else 'T;1'
+            print('send message %s' %str(msg))
+            self.gwClient.sendto(msg.encode('utf-8'), (gv.CT_IP[0], gv.CT_IP[1]))
+            if gv.iGWTablePanel:
+                print("xxx")
+                gv.iGWTablePanel.updateSafe(self.tlsCB.IsChecked())
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

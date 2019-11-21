@@ -180,7 +180,8 @@ class PanelGwInfo(wx.Panel):
         if gv.iSelectedGW:
             dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
             rowIdx = dataDict['Idx']
-            safeStr, color = 'Enabled', wx.Colour((132, 133, 249)) if safeFlag else 'Disabled', wx.Colour((83, 81, 251))
+            safeStr = 'Enabled' if safeFlag else 'Disabled'
+            color =  wx.Colour((132, 133, 249)) if safeFlag else  wx.Colour((83, 81, 251))
             dataDict['qcrypt'] = safeStr
             self.grid.SetCellValue(rowIdx, 2, safeStr)
             self.grid.SetCellBackgroundColour(rowIdx, 2, color)
