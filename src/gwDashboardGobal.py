@@ -31,6 +31,8 @@ GWFL_PATH = os.path.join(dirpath, IMG_FD, "gwoffline.png")
 GWQE_PATH = os.path.join(dirpath, IMG_FD, "gwqenable.png")
 GWQD_PATH = os.path.join(dirpath, IMG_FD, "qsdisable.png")
 
+PTQS_PATH = os.path.join(dirpath, IMG_FD, "pctLb1.png")
+PTGP_PATH = os.path.join(dirpath, IMG_FD, "pctLb2.png")
 
 # dashboard own UDP server IP address.
 SE_IP = ('0.0.0.0', 5005)       # Sensor server IP

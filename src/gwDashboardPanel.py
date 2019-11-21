@@ -154,30 +154,46 @@ class PanelGwInfo(wx.Panel):
 class PanelPieChart(wx.Panel):
     """ chart to display data based on time.
     """
-    def __init__(self, parent, pnlSize=(320, 320)):
+    def __init__(self, parent, pnlSize=(350, 320)):
         wx.Panel.__init__(self, parent, size=pnlSize)
-        self.SetBackgroundColour(wx.Colour(18, 86, 133))
-
-    
-        mSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.mypie = PC.PieCtrl(self, -1, wx.DefaultPosition, wx.Size(180,270))
-        self.mypie.SetBackColour(wx.Colour(150, 200, 255))
+        self.SetBackgroundColour(wx.Colour(30, 30, 30))
         
-        self.part1 = PC.PiePart()
-        self.part1.SetLabel("Average: 1")
-        self.part1.SetValue(12)
-        self.part1.SetColour(wx.Colour(0, 205, 52))
-        self.mypie._series.append(self.part1)
+        flagsR, tColour = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200, 200, 200)
+        gs = wx.FlexGridSizer(3, 2, 5, 5)
+        gs.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.PTQS_PATH, wx.BITMAP_TYPE_ANY)), flag=flagsR, border=2)
+        gs.Add(wx.StaticBitmap(self, -1, wx.Bitmap(gv.PTGP_PATH, wx.BITMAP_TYPE_ANY)), flag=flagsR, border=2)
+        
+        self.label1 = wx.StaticText(self, label=" [ 0% ] ")
+        self.label1.SetFont(gv.iTitleFont)
+        self.label1.SetForegroundColour(tColour)
+        gs.Add(self.label1, flag=wx.ALIGN_CENTER_HORIZONTAL, border=2)
+        
+        self.label2 = wx.StaticText(self, label=" [ 0% ] ")
+        self.label2.SetFont(gv.iTitleFont)
+        self.label2.SetForegroundColour(tColour)
+        gs.Add(self.label2, flag=wx.ALIGN_CENTER_HORIZONTAL, border=2)
 
-        self.part2 = PC.PiePart()
-        self.part2.SetLabel("Label 2")
-        self.part2.SetValue(100-12)
-        self.part2.SetColour(wx.Colour(83, 81, 251))
-        self.mypie._series.append(self.part2)
+        self.progress_pie1 = PC.ProgressPie(self, 100, 20, -1, wx.DefaultPosition,
+                                      wx.Size(170, 245), wx.SIMPLE_BORDER)
+        self.progress_pie1.SetBackColour(wx.Colour(200, 210, 200))
+        self.progress_pie1.SetFilledColour(wx.Colour(83, 81, 251))
+        #self.progress_pie1.SetUnfilledColour(wx.Colour(18, 86, 133))
+        self.progress_pie1.SetUnfilledColour(wx.Colour(246, 185, 0))
+        self.progress_pie1.SetHeight(5)
+        gs.Add(self.progress_pie1,flag=flagsR, border=2)
 
-        mSizer.Add(self.mypie, 1, wx.EXPAND | wx.ALL, 5)
+       
+        self.progress_pie2 = PC.ProgressPie(self, 100, 40, -1, wx.DefaultPosition,
+                                      wx.Size(170, 245), wx.SIMPLE_BORDER)
+        self.progress_pie2.SetBackColour(wx.Colour(200, 210, 200))
+        self.progress_pie2.SetFilledColour(wx.Colour(26, 205, 152))
+        #self.progress_pie2.SetUnfilledColour(wx.Colour(18, 86, 133))
+        self.progress_pie2.SetUnfilledColour(wx.Colour(246, 185, 0))
+        self.progress_pie2.SetHeight(5)
+        gs.Add(self.progress_pie2,flag=flagsR, border=2)
+
+        self.SetSizer(gs)
         self.Layout()
-        self.SetSizer(mSizer)
         #self.SetDoubleBuffered(True)
 
     def updatePieVals(self):
@@ -361,19 +377,19 @@ class ChartDisplayPanelLinux(wx.Panel):
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
         self.uploadPanel.setChartCmt(' ', 'Mbps',(82, 153, 85))
 
-        #gs.AddSpacer(20)
-        #self.piePanel = PanelPieChart(self)
-        #gs.Add(self.piePanel,flag=flagsR, border=2)
-        # > 
-        progress_pie = PC.ProgressPie(self, 100, 50, -1, wx.DefaultPosition,
-                                      wx.Size(180, 200), wx.SIMPLE_BORDER)
-        progress_pie.SetBackColour(wx.Colour(18, 86, 133))
-        progress_pie.SetFilledColour(wx.Colour(200, 50, 50))
-        progress_pie.SetUnfilledColour(wx.Colour(50, 200, 50))
-        progress_pie.SetHeight(5)
-        gs.Add(progress_pie,flag=flagsR, border=2)
+        gs.AddSpacer(20)
 
-        progress_pie.SetValue(50)
+        # > 
+        #progress_pie = PC.ProgressPie(self, 100, 50, -1, wx.DefaultPosition,
+        #                              wx.Size(180, 200), wx.SIMPLE_BORDER)
+        #progress_pie.SetBackColour(wx.Colour(18, 86, 133))
+        #progress_pie.SetFilledColour(wx.Colour(200, 50, 50))
+        
+        #progress_pie.SetUnfilledColour(wx.Colour(50, 200, 50))
+        #progress_pie.SetHeight(5)
+        #gs.Add(progress_pie,flag=flagsR, border=2)
+
+        #progress_pie.SetValue(50)
 
 
 
@@ -395,7 +411,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         gs.Add(opepLb,flag=flagsR, border=2)
         
 
-        cpepLb = wx.StaticText(self, label=' Percentage of packets protected by gateway (Selective Encryption)')
+        cpepLb = wx.StaticText(self, label=' Average Percentage Value in 1min ')
         cpepLb.SetFont(titleFont)
         cpepLb.SetForegroundColour(wx.Colour(200, 210, 200))
         cpepLb.SetToolTip("Data helper string: \n \
@@ -412,6 +428,11 @@ class ChartDisplayPanelLinux(wx.Panel):
         self.percetPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.percetPanel,flag=flagsR, border=2)
         self.percetPanel.setChartCmt(' ', '   %', (120, 120, 120))
+
+        self.piePanel = PanelPieChart(self)
+        gs.Add(self.piePanel,flag=flagsR, border=2)
+
+
         mSizer.Add(gs, flag=flagsR, border=2)
         mSizer.AddSpacer(50)
         mSizer.Layout()

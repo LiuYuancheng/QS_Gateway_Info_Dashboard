@@ -24,7 +24,7 @@ import gwDashboardGobal as gv
 import gwDashboardPanel as gp
 
 PERIODIC = 500  # main thread periodically callback by 10ms.
-WIN_SIZE = (1900, 1040) if gv.WIN_SYS else (1900, 1040)
+WIN_SIZE = (1920, 1040) if gv.WIN_SYS else (1920, 1040)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -42,6 +42,7 @@ class gwDsahboardFrame(wx.Frame):
         gv.iTitleFont = wx.Font(12, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)
         gv.iWeidgeClr = wx.Colour(46, 52, 66)
         self.tlsTimeStr = ''    # new tls time string.
+        
         # Init the data manager. 
         gv.iDataMgr = GWDataMgr(self, dataSize=(4, 80))
         # Build the UI.
@@ -276,7 +277,7 @@ class gwDsahboardFrame(wx.Frame):
 
                 #gv.iDataMgr.updateData(gv.iOwnID, [random.randint(1,20) for i in range(4)])
             # Check the tls json file.
-            #self.checkTLSRpt()
+            self.checkTLSRpt()
 
             if gv.iSelectedGW:
                 dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
@@ -321,29 +322,7 @@ class gwDsahboardFrame(wx.Frame):
         
         if self.tlsTimeStr != tlsDict['Time']:
             self.tlsTimeStr = tlsDict['Time']
-            self.appendTlsInfo((tlsDict['Src_IP_address'], tlsDict['Dest_IP_address'], tlsDict['TLS_Version'], tlsDict['TLS_Cipher_Suite']))
-
-
-    def appendTlsInfo(self, tlsList):
-        self.updateTlsDetail(' New TLS connection:')
-        self.updateTlsDetail(' Time : %s' %str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")))
-        lbList = (' Src IP address :',
-                  ' Dest IP address : ',
-                  ' TLS Version : ',
-                  ' TLS Cipher Suite : ')
-        for i, val in enumerate(lbList):
-            self.updateTlsDetail(val+str(tlsList[i]))
-        self.updateTlsDetail('---------------------------------------------------------\n\n')
-
-    def updateTlsDetail(self, data):
-        """ Update the data in the detail text field. Input 'None' will clear the 
-            detail information text field.
-        """
-        return
-        if data is None:
-            self.tlsTF.Clear()
-        else:
-            self.tlsTF.AppendText(" - %s \n" %str(data))
+            self.gwPanel.appendTlsInfo((tlsDict['Src_IP_address'], tlsDict['Dest_IP_address'], tlsDict['TLS_Version'], tlsDict['TLS_Cipher_Suite']))
 
 #-----------------------------------------------------------------------------
     def updateGateWayInfo(self, newGwFlag):
@@ -373,6 +352,7 @@ class PanelGwData(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(gv.iWeidgeClr)
+        self.tlsCount = 0 
         self.SetSizer(self._buildGatewaySizer())
         self.SetDoubleBuffered(True)
 
@@ -419,6 +399,14 @@ class PanelGwData(wx.Panel):
         outBox.SetForegroundColour(tColour)
         outBox.SetBackgroundColour(gv.iWeidgeClr)
         vbox = wx.StaticBoxSizer(outBox, wx.VERTICAL)
+        
+        self.tlsCountLb = wx.StaticText(outBox, label=" Total TLS Connection Number: 0 ")
+        self.tlsCountLb.SetForegroundColour(tColour)
+
+        vbox.Add(self.tlsCountLb, flag=flagsR, border=2)
+        vbox.AddSpacer(5)
+
+
         self.tlsTF = wx.TextCtrl(outBox, size=(370, 350), style=wx.TE_MULTILINE)
         vbox.Add(self.tlsTF, flag=flagsR, border=2)
         self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
@@ -487,6 +475,34 @@ class PanelGwData(wx.Panel):
         return (bsizer, valueLblist)
 
 
+    def appendTlsInfo(self, tlsList):
+        self.updateTlsDetail(' New TLS connection [idx : %s] ' %str(self.tlsCount))
+        self.updateTlsDetail(' Time Stamp       : %s' %str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")))
+        lbList = (' Src IP Address   :',
+                  ' Dest IP Address  : ',
+                  ' TLS Version      : ',
+                  ' TLS Cipher Suite : ')
+        for i, val in enumerate(lbList):
+            self.updateTlsDetail(val+str(tlsList[i]))
+        
+        if any(x in str(tlsList[i]) for x in ['AES', '128', 'ICDH', 'RSA', '3DES']):
+            self.updateTlsDetail(' Quantum Safe     : %s' %'Not Safe')
+        else:
+            self.updateTlsDetail(' Quantum Safe     : %s' %'Safe')
+
+        self.updateTlsDetail('--'*30)
+        self.tlsCount += 1
+        self.tlsCountLb.SetLabel(" Total TLS Connection Number : %s " %str(self.tlsCount))
+
+
+    def updateTlsDetail(self, data):
+        """ Update the data in the detail text field. Input 'None' will clear the 
+            detail information text field.
+        """
+        if data is None:
+            self.tlsTF.Clear()
+        else:
+            self.tlsTF.AppendText(" - %s \n" %str(data))
 
 
 
@@ -645,7 +661,6 @@ class GWReportServ(threading.Thread):
         closeClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         closeClient.sendto(b'', ("127.0.0.1", gv.SE_IP[1]))
         closeClient.close()
-
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
