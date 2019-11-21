@@ -478,7 +478,7 @@ class PanelGwData(wx.Panel):
     def appendTlsInfo(self, tlsList):
         self.updateTlsDetail(' New TLS connection [idx : %s] ' %str(self.tlsCount))
         self.updateTlsDetail(' Time Stamp       : %s' %str(datetime.now().strftime("%m_%d_%Y_%H:%M:%S")))
-        lbList = (' Src IP Address   :',
+        lbList = (' Src IP Address   : ',
                   ' Dest IP Address  : ',
                   ' TLS Version      : ',
                   ' TLS Cipher Suite : ')

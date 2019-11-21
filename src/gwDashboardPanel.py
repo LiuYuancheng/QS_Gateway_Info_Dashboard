@@ -30,6 +30,7 @@ class PanelGwInfo(wx.Panel):
         self.SetBackgroundColour(gv.iWeidgeClr)
         self.selectedID = ''    # selected ID by User.
         self.SetSizer(self._buidUISizer())
+        self.counterDict = {'online':0, 'delay':0, 'offline':0, 'safe':0, 'unsafe':0}
 
 #-----------------------------------------------------------------------------
     def _buidUISizer(self):
@@ -94,8 +95,8 @@ class PanelGwInfo(wx.Panel):
         rowIdx = dataDict['Idx']
         dataSequence = (str(dataID),
                         str(dataDict['IpMac']),
-                        str(dataDict['version']),
                         str(dataDict['qcrypt']),
+                        str(dataDict['version']),
                         str(dataDict['pdpkVer'][0]),
                         str(dataDict['pdpkVer'][1]),
                         str(dataDict['pdpkVer'][2]),
@@ -107,6 +108,8 @@ class PanelGwInfo(wx.Panel):
         for i in range(self.collumNum):
             self.grid.SetCellValue(rowIdx, i, dataSequence[i])
         self.grid.Refresh(True)
+        self.counterDict['online'] += 1
+        self.gwCounterLt[0].SetLabel(' :  %s ' %str(self.counterDict['online']))
 
 #-----------------------------------------------------------------------------
     def onLeftClick(self, event):
@@ -140,15 +143,46 @@ class PanelGwInfo(wx.Panel):
             rpTime = item['ReportT']
             deltT = time.time() - rpTime
             if  deltT > 10:
-                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))
+                self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('RED'))    
             elif 5 < deltT <= 10:
                     self.grid.SetCellBackgroundColour(idx, 0, wx.Colour('YELLOW'))
             else:
                 self.grid.SetCellBackgroundColour(idx, 0, wx.Colour((0, 255, 0)))
             self.grid.SetCellValue(idx, self.collumNum-1 , str(datetime.fromtimestamp(int(rpTime))))
+            
+    
+            if not'Dis' in item['qcrypt']:
+                self.grid.SetCellBackgroundColour(idx, 2, wx.Colour((132, 133, 249)))
+            else:
+                self.grid.SetCellBackgroundColour(idx, 2, wx.Colour((246, 158, 1)))
+            
+            on = de = of = sa = nc = 0
+            for i in range(2):
+                color = self.grid.GetCellBackgroundColour(i, 0)
+                if color == wx.Colour('RED'): of +=1
+                if color == wx.Colour('YELLOW'): de +=1
+                if color == wx.Colour((0, 255, 0)): on +=1
+                safeStr = self.grid.GetCellBackgroundColour(i, 2)
+                if safeStr == 'Enabled': 
+                    sa += 1
+                else:
+                    nc += 1
 
+            self.gwCounterLt[0].SetLabel(' :  %s ' %str(on))
+            self.gwCounterLt[1].SetLabel(' :  %s ' %str(de))
+            self.gwCounterLt[2].SetLabel(' :  %s ' %str(of))
+            self.gwCounterLt[3].SetLabel(' :  %s ' %str(sa))
+            self.gwCounterLt[4].SetLabel(' :  %s ' %str(nc))
 
-
+    def updateSafe(self, safeFlag):
+        if gv.iSelectedGW:
+            dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
+            rowIdx = dataDict['Idx']
+            safeStr, color = 'Enabled', wx.Colour((132, 133, 249)) if safeFlag else 'Disabled', wx.Colour((83, 81, 251))
+            dataDict['qcrypt'] = safeStr
+            self.grid.SetCellValue(rowIdx, 2, safeStr)
+            self.grid.SetCellBackgroundColour(rowIdx, 2, color)
+            
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelPieChart(wx.Panel):
@@ -393,7 +427,7 @@ class ChartDisplayPanelLinux(wx.Panel):
 
 
 
-        ipepLb = wx.StaticText(self, label=' Percentage of TLS Packets')
+        ipepLb = wx.StaticText(self, label=' Percentage of Quantum Safe Packets')
         ipepLb.SetFont(titleFont)
         ipepLb.SetForegroundColour(wx.Colour(200, 210, 200))
         ipepLb.SetToolTip("Data helper string: \n \
@@ -402,7 +436,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         gs.Add(ipepLb,flag=flagsR, border=2)
         
         
-        opepLb = wx.StaticText(self, label=' Percentage of packets protected by gateway (Selective Encryption)')
+        opepLb = wx.StaticText(self, label=' Percentage of Packets Protected by Gateway (Selective Encryption)')
         opepLb.SetFont(titleFont)
         opepLb.SetForegroundColour(wx.Colour(200, 210, 200))
         opepLb.SetToolTip("Data helper string: \n \
