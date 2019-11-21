@@ -16,6 +16,7 @@ import random
 import wx.grid
 import wx.lib.sized_controls as sc
 import wx.lib.agw.piectrl as PC
+import math
 
 from statistics import mean
 
@@ -29,7 +30,8 @@ class PanelGwInfo(wx.Panel):
     """ gateway information."""
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(gv.iWeidgeClr)
+        #self.SetBackgroundColour(gv.iWeidgeClr)
+        self.SetBackgroundColour(wx.Colour(30, 30, 30))
         self.selectedID = ''    # selected ID by User.
         self.SetSizer(self._buidUISizer())
         self.counterDict = {'online':0, 'delay':0, 'offline':0, 'safe':0, 'unsafe':0}
@@ -48,9 +50,9 @@ class PanelGwInfo(wx.Panel):
         #self.gwStLb = wx.StaticText(self, label="[Online/Total]: 0/0")
         #hbox.Add(self.gwStLb, flag=wx.ALIGN_BOTTOM, border=2)
         #hbox.AddSpacer(20)
-        outBox = wx.StaticBox(self, -1, label="Gateway Counter", size=(200, 400))
+        outBox = wx.StaticBox(self, -1, label="Gateway States", size=(200, 400))
         outBox.SetForegroundColour(tColour)
-        outBox.SetBackgroundColour(gv.iWeidgeClr)
+        #outBox.SetBackgroundColour(gv.iWeidgeClr)
         bsizer = wx.StaticBoxSizer(outBox, wx.HORIZONTAL)
         gs = wx.FlexGridSizer(5, 2, 5, 5)
         self.gwCounterLt = []
@@ -178,13 +180,14 @@ class PanelGwInfo(wx.Panel):
 
     def updateSafe(self, safeFlag):
         if gv.iSelectedGW:
+            print("-----------------")
             dataDict = gv.iDataMgr.getDataDict(gv.iSelectedGW)
             rowIdx = dataDict['Idx']
             safeStr = 'Enabled' if safeFlag else 'Disabled'
-            color =  wx.Colour((132, 133, 249)) if safeFlag else  wx.Colour((83, 81, 251))
+            #color =  wx.Colour((132, 133, 249)) if safeFlag else  wx.Colour((83, 81, 251))
             dataDict['qcrypt'] = safeStr
             self.grid.SetCellValue(rowIdx, 2, safeStr)
-            self.grid.SetCellBackgroundColour(rowIdx, 2, color)
+            #self.grid.SetCellBackgroundColour(rowIdx, 2, color)
             
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -212,7 +215,7 @@ class PanelPieChart(wx.Panel):
 
         self.progress_pie1 = PC.ProgressPie(self, 100, 20, -1, wx.DefaultPosition,
                                       wx.Size(170, 245), wx.SIMPLE_BORDER)
-        self.progress_pie1.SetBackColour(wx.Colour(200, 210, 200))
+        self.progress_pie1.SetBackColour(wx.Colour(200, 200, 210))
         self.progress_pie1.SetFilledColour(wx.Colour(83, 81, 251))
         #self.progress_pie1.SetUnfilledColour(wx.Colour(18, 86, 133))
         self.progress_pie1.SetUnfilledColour(wx.Colour(246, 185, 0))
@@ -222,7 +225,7 @@ class PanelPieChart(wx.Panel):
        
         self.progress_pie2 = PC.ProgressPie(self, 100, 40, -1, wx.DefaultPosition,
                                       wx.Size(170, 245), wx.SIMPLE_BORDER)
-        self.progress_pie2.SetBackColour(wx.Colour(200, 210, 200))
+        self.progress_pie2.SetBackColour(wx.Colour(200, 200, 210))
         self.progress_pie2.SetFilledColour(wx.Colour(26, 205, 152))
         #self.progress_pie2.SetUnfilledColour(wx.Colour(18, 86, 133))
         self.progress_pie2.SetUnfilledColour(wx.Colour(246, 185, 0))
@@ -247,16 +250,17 @@ class PanelPieChart(wx.Panel):
 class PanelChart(wx.Panel):
     """ chart to display data based on time.
     """
-    def __init__(self, parent, recNum=20, axisRng=(10, 1), pnlSize=(550, 320)):
+    def __init__(self, parent, recNum=20, axisRng=(10, 1), pnlSize=(550, 320), logMode=False):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=pnlSize)
-        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.title = ''     
         self.yLabel = ''
         self.lColor = (82, 153, 85)
         self.panelSize = pnlSize
         self.recNum = recNum
         self.axisRng = axisRng
+        self.logMode = logMode
         self.updateFlag = True  # flag whether we update the diaplay area
         self.data = [0] * self.recNum
         self.times = [str((i-9)*axisRng[0]) for i in range(10)]
@@ -288,13 +292,13 @@ class PanelChart(wx.Panel):
         dc.SetPen(wx.Pen('WHITE'))
         dc.DrawRectangle(40, 40, w-80, h-80)
         # DrawTitle:
-        font = dc.GetFont()
-        font.SetPointSize(10)
-        dc.SetFont(font)
-        dc.DrawText(self.title, 200, 5)
-        font.SetPointSize(8)
+        #font = dc.GetFont()
+        #font.SetPointSize(10)
+        #dc.SetFont(font)
+        #dc.DrawText(self.title, 200, 5)
+        #font.SetPointSize(8)
         dc.SetFont(wx.Font(8, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD))
-
+        dc.DrawText(self.title, 5, 5)
 
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
@@ -307,7 +311,13 @@ class PanelChart(wx.Panel):
         offsetX = (w-80)//10
         for i in range(10):
             dc.DrawLine(zx, zy-i*offsetY, offsetX*10, zy-i*offsetY)
-            dc.DrawText(str(i*self.axisRng[1]).zfill(2), 18, zy-i*offsetY-7)
+            if self.logMode:
+                ylb = math.pow(10, i)*self.axisRng[1]
+                if ylb > 10:
+                    ylb = ylb//1
+                dc.DrawText(str(ylb), 8, zy-i*offsetY-12)
+            else:
+                dc.DrawText(str(i*self.axisRng[1]).zfill(2), 18, zy-i*offsetY-7)
         for i in range(10): 
             dc.DrawLine(i*offsetX+zx, 40+offsetY, i*offsetX+zx, zy) # X-Grid
             dc.DrawText(self.times[i], i*offsetX-10+zx, zy+5)
@@ -323,9 +333,9 @@ class PanelChart(wx.Panel):
         zx, zy = 40, h-40
         (label, color) = ('data1', '#0AB1FF')
         dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawText('Peak Value: [ %s ]' %str(max(self.data)), w-150, 5)
+        dc.DrawText('Peak Value: [ %s ]' %str(max(self.data)), w-250, 5)
 
-        dc.DrawText('Current Value[ %s ]' %str(self.data[-1]), w-150, 20)
+        dc.DrawText('Current Value[ %s ]' %str(self.data[-1]), w-250, 20)
 
         #dc.DrawSpline([(i*20, self.data[i]*10) for i in range(self.recNum)])
         gdc = wx.GCDC(dc)
@@ -333,8 +343,12 @@ class PanelChart(wx.Panel):
         (r, g, b),  alph = self.lColor, 128 # half transparent alph
         gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
         delta, scale = offsetX*9//self.recNum, self.axisRng[1]
-        poligon =[(zx, zy+1)]+[(zx+i*delta, int( zy- min(self.data[i]/scale, 10)*offsetY)) for i in range(self.recNum)]+[(zx + offsetX*9, zy+1)]
-        gdc.DrawPolygon(poligon)
+        if self.logMode:
+            poligon =[(zx, zy+1)]+[(zx+i*delta, int(zy-math.log10(max(self.data[i]/scale, 1))*offsetY)) for i in range(self.recNum)]+[(zx + offsetX*9, zy+1)]
+            gdc.DrawPolygon(poligon)
+        else:
+            poligon =[(zx, zy+1)]+[(zx+i*delta, int( zy- min(self.data[i]/scale, 10)*offsetY)) for i in range(self.recNum)]+[(zx + offsetX*9, zy+1)]
+            gdc.DrawPolygon(poligon)
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
@@ -381,7 +395,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         itsLb = wx.StaticText(self, label=' Incoming Throughput Speed ')
         itsLb.SetFont(titleFont)
         itsLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        itsLb.SetToolTip("Data helper string: \n \
+        itsLb.SetToolTip("Incoming Throughput:\n \
                          Gate way average incoming data packed speed.\n \
                          unit:Mbps")
         gs.Add(itsLb,flag=flagsR, border=2)
@@ -389,7 +403,7 @@ class ChartDisplayPanelLinux(wx.Panel):
         otsLb = wx.StaticText(self, label=' Outgoing Throughput Speed ')
         otsLb.SetFont(titleFont)
         otsLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        otsLb.SetToolTip("Data helper string: \n \
+        otsLb.SetToolTip("Outgoing Throughput:\n \
                     Gate way average incoming data packed speed.\n \
                     unit:Mbps")
         gs.Add(otsLb,flag=flagsR, border=2)
@@ -406,13 +420,13 @@ class ChartDisplayPanelLinux(wx.Panel):
 
 
         
-        self.downPanel = PanelChart(self, recNum=80, axisRng=(10, 50))
+        self.downPanel = PanelChart(self, recNum=80, axisRng=(10, 0.00001), logMode=True)
         gs.Add(self.downPanel,flag=flagsR, border=2)
-        self.downPanel.setChartCmt(' ', 'Mbps',(200, 0, 0))
+        self.downPanel.setChartCmt('Log10 Scale Chart', 'Mbps',(200, 0, 0))
 
-        self.uploadPanel = PanelChart(self, recNum=80, axisRng=(10, 50))
+        self.uploadPanel = PanelChart(self, recNum=80, axisRng=(10, 0.00001), logMode=True)
         gs.Add(self.uploadPanel,flag=flagsR, border=2)
-        self.uploadPanel.setChartCmt(' ', 'Mbps',(82, 153, 85))
+        self.uploadPanel.setChartCmt('Log10 Scale Chart', 'Mbps',(82, 153, 85))
 
         gs.AddSpacer(20)
 
@@ -433,18 +447,20 @@ class ChartDisplayPanelLinux(wx.Panel):
         ipepLb = wx.StaticText(self, label=' Percentage of Quantum Safe Packets')
         ipepLb.SetFont(titleFont)
         ipepLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        ipepLb.SetToolTip("Data helper string: \n \
-            Gate way average incoming data packed speed.\n \
-            unit:Mbps")
+        ipepLb.SetToolTip("Secure Packet Sources:\n \
+            - Quantum Safe gateway\n \
+            unit:%")
         gs.Add(ipepLb,flag=flagsR, border=2)
-        
         
         opepLb = wx.StaticText(self, label=' Percentage of Packets Protected by Gateway (Selective Encryption)')
         opepLb.SetFont(titleFont)
         opepLb.SetForegroundColour(wx.Colour(200, 210, 200))
-        opepLb.SetToolTip("Data helper string: \n \
-            Gate way average incoming data packed speed.\n \
-            unit:Mbps")
+        opepLb.SetToolTip("IP Bypass:\n \
+            3.15.0.0/16\n \
+            43.251.41.28/24\n \
+            13.0.0.0/8\n \
+            72.14.0.0/16\n \
+            74.125.0.0/16")
         gs.Add(opepLb,flag=flagsR, border=2)
         
 
@@ -458,11 +474,11 @@ class ChartDisplayPanelLinux(wx.Panel):
 
         self.throuthPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.throuthPanel,flag=flagsR, border=2)
-        self.throuthPanel.setChartCmt(' ', '   %',(83, 81, 251))
+        self.throuthPanel.setChartCmt('Linear Scale Chart', '   %',(83, 81, 251))
 
         self.percetPanel = PanelChart(self, recNum=80, axisRng=(10, 10))
         gs.Add(self.percetPanel,flag=flagsR, border=2)
-        self.percetPanel.setChartCmt(' ', '   %', (26, 205, 152))
+        self.percetPanel.setChartCmt('Linear Scale Chart', '   %', (26, 205, 152))
 
         self.piePanel = PanelPieChart(self)
         gs.Add(self.piePanel,flag=flagsR, border=2)

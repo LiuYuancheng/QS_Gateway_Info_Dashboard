@@ -214,7 +214,7 @@ class gwDsahboardFrame(wx.Frame):
         flagsR, tColour = wx.LEFT | wx.ALIGN_CENTER_VERTICAL, wx.Colour(200, 200, 200)
         outBox = wx.StaticBox(self, -1, label=mainLabel, size=bSize)
         outBox.SetForegroundColour(tColour)
-        outBox.SetBackgroundColour(gv.iWeidgeClr)
+        #outBox.SetBackgroundColour(gv.iWeidgeClr)
         bsizer = wx.StaticBoxSizer(outBox, layout)
         gs = wx.GridSizer(len(subLabels), 2, 5, 5) if layout == wx.VERTICAL else wx.GridSizer(
             1, len(subLabels)*2, 5, 5)
@@ -410,6 +410,7 @@ class PanelGwData(wx.Panel):
 
 
         self.tlsTF = wx.TextCtrl(outBox, size=(370, 350), style=wx.TE_MULTILINE)
+        self.tlsTF .SetBackgroundColour(wx.Colour(200, 200, 210))
         vbox.Add(self.tlsTF, flag=flagsR, border=2)
         self.tlsTF.AppendText("----------- Gateway TLS connection information ---------- \n")
         vbox.AddSpacer(3)
@@ -428,7 +429,6 @@ class PanelGwData(wx.Panel):
         self.tlsCB.SetForegroundColour(tColour)
         self.tlsCB.SetValue(True)
         vbox.Add(self.tlsCB, flag=wx.EXPAND, border=2)
-        #self.Bind(wx.EVT_CHECKBOX,self.ontlsCB)
         vbox.AddSpacer(5)
         
 
@@ -437,16 +437,16 @@ class PanelGwData(wx.Panel):
         self.crypCB.SetForegroundColour(tColour)
         self.crypCB.SetValue(True)
         vbox.Add(self.crypCB, flag=wx.EXPAND, border=2)
-        #self.Bind(wx.EVT_CHECKBOX,self.onMapCB)
         vbox.AddSpacer(5)
         
 
 
-        self.mapCB = wx.CheckBox(outBox, label = ' Show Gateway GPS position on Google Map') 
+        self.mapCB = wx.CheckBox(outBox, label = ' Show Gateway GPS Position on Google Map') 
         self.mapCB.SetForegroundColour(tColour)
-        self.mapCB.SetValue(True)
+        self.mapCB.SetValue(False)
         vbox.Add(self.mapCB, flag=wx.EXPAND, border=2)
-        self.Bind(wx.EVT_CHECKBOX,self.onMapCB)
+        
+        self.Bind(wx.EVT_CHECKBOX, self.onCheckBox)
         vbox.AddSpacer(3)
         return vbox
 
@@ -513,23 +513,23 @@ class PanelGwData(wx.Panel):
         else:
             self.tlsTF.AppendText(" - %s \n" %str(data))
 
-    def onMapCB(self, event):
+    def onCheckBox(self, event):
         """ Creat the google map gps position marked url and open the url by the 
             system default browser.
         """
         cb = event.GetEventObject()
-        if cb.GetLabel() == ' Show Gateway GPS position on Google Map' and self.mapCB.IsChecked():
+        if cb.GetLabel() == ' Show Gateway GPS Position on Google Map' and self.mapCB.IsChecked():
             url = "http://maps.google.com/maps?z=12&t=m&q=loc:" + \
                 str(1.2988)+"+"+str(103.836)
             print(url)
             webbrowser.open_new(url)
+        
         if cb.GetLabel() == ' Enable Gateway Quantum Encryption Function':
-            msg = 'T;1' if self.tlsCB.IsChecked() else 'T;1'
+            msg = 'T;1' if self.crypCB.IsChecked() else 'T;1'
             print('send message %s' %str(msg))
             self.gwClient.sendto(msg.encode('utf-8'), (gv.CT_IP[0], gv.CT_IP[1]))
             if gv.iGWTablePanel:
-                print("xxx")
-                gv.iGWTablePanel.updateSafe(self.tlsCB.IsChecked())
+                gv.iGWTablePanel.updateSafe(self.crypCB.IsChecked())
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -560,7 +560,7 @@ class GWDataMgr(object):
         dataVal = {
             'Idx':      self.gwCount, 
             'IpMac':    ipStr,
-            'qcrypt':   'Disabled',
+            'qcrypt':   'Enabled',
             'version':  version,
             'pdpkVer':  (dpdk_v, dpdk_c, dpdk_e),
             'keyExch':  keyE,
