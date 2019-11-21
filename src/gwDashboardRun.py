@@ -525,7 +525,7 @@ class PanelGwData(wx.Panel):
             webbrowser.open_new(url)
         
         if cb.GetLabel() == ' Enable Gateway Quantum Encryption Function':
-            msg = 'T;1' if self.crypCB.IsChecked() else 'T;1'
+            msg = 'T;1' if self.crypCB.IsChecked() else 'T;0'
             print('send message %s' %str(msg))
             self.gwClient.sendto(msg.encode('utf-8'), (gv.CT_IP[0], gv.CT_IP[1]))
             if gv.iGWTablePanel:
