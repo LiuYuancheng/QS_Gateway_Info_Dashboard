@@ -7,6 +7,25 @@ import time
 client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gatewayDB')
 
 
+#Add the gatway information
+
+
+json_body = [
+    {
+        "measurement": "temp",
+        "tags": {
+            "gatewayID": "Demo_GW_00",
+            },
+        "fields": {
+            "ipAddr": "138.75.53.189",
+            "gwVer":  "v1.1",
+            "dpdk_v": "19.08",
+
+            "value": random.uniform(1.0, 100.0)
+            }
+    }]
+
+
 
 for i in range(14):
     json_body = [
@@ -23,6 +42,7 @@ for i in range(14):
     client.write_points(json_body)
     result = client.query('select * from temp;')
     time.sleep(1)
+
 exit()
 
 for i in range(14):
