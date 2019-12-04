@@ -31,48 +31,41 @@ json_body = [
 #client.write_points(json_body)
 #exit()
 
-for i in range(10):
+
+tls_json = [
+    {
+        "measurement": "tlsConn",
+        "tags": {
+            "Name": "time",
+            },
+        "fields": {
+            "src": "137.132.213.225",
+            "dest": "136.132.213.218",
+            "ver": "TLS 1.2", 
+            "cipher": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+            }
+    }]
+#client.write_points(tls_json)
+
+for i in range(1000):
     print("insert a value")
-# Add the thought put data into the table.
-    json_body = [
-        {
-            "measurement": "thoughput",
-            "tags": {
-                "Name": "data",
-                },
-            "fields": {
-                "ival": random.uniform(10.0, 300.0),
-                "oval": random.uniform(10.0, 300.0)
-                }
-        }]
-
-    client.write_points(json_body)
-    time.sleep(1)
-
-    latency_json = [
+    data_json = [
         {
             "measurement": "dataVals",
             "tags": {
                 "Name": "time",
                 },
             "fields": {
+                "ival": random.uniform(100.0, 300.0),
+                "oval": random.uniform(100.0, 300.0),
                 "latVal": random.randint(10, 80),
                 "pctVal": random.randint(10, 100),
-                "grgVal": random.randint(1, 10),
+                "frgVal": random.randint(1, 10),
                 }
         }]
 
-    client.write_points(latency_json)
-    time.sleep(1)
-
-
-
-
-
-
-
-
-
+    client.write_points(data_json)
+    time.sleep(2)
 
 print('finished')
 exit()
