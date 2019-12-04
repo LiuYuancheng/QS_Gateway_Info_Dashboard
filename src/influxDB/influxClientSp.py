@@ -12,18 +12,71 @@ client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gatewayDB')
 
 json_body = [
     {
-        "measurement": "temp",
+        "measurement": "gatewaytable",
         "tags": {
-            "gatewayID": "Demo_GW_00",
+            "gatewayID": "Demo_GW_02",
             },
         "fields": {
-            "ipAddr": "138.75.53.189",
+            "ipAddr": "138.75.53.187",
             "gwVer":  "v1.1",
             "dpdk_v": "19.08",
-
+            "dpdk_c": "Openssl",
+            "dpdk_e": "AES-CBC 256",
+            "keyE": "Custom",
+            "GPS": "[1.2988,103.836]",
             "value": random.uniform(1.0, 100.0)
             }
     }]
+# Insert the 
+#client.write_points(json_body)
+#exit()
+
+for i in range(10):
+    print("insert a value")
+# Add the thought put data into the table.
+    json_body = [
+        {
+            "measurement": "thoughput",
+            "tags": {
+                "Name": "data",
+                },
+            "fields": {
+                "ival": random.uniform(10.0, 300.0),
+                "oval": random.uniform(10.0, 300.0)
+                }
+        }]
+
+    client.write_points(json_body)
+    time.sleep(1)
+
+    latency_json = [
+        {
+            "measurement": "dataVals",
+            "tags": {
+                "Name": "time",
+                },
+            "fields": {
+                "latVal": random.randint(10, 80),
+                "pctVal": random.randint(10, 100),
+                "grgVal": random.randint(1, 10),
+                }
+        }]
+
+    client.write_points(latency_json)
+    time.sleep(1)
+
+
+
+
+
+
+
+
+
+
+print('finished')
+exit()
+
 
 
 
