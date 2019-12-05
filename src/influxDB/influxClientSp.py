@@ -47,6 +47,22 @@ tls_json = [
     }]
 #client.write_points(tls_json)
 
+
+location_json = [
+    {
+        "measurement": "location",
+        "tags": {
+            "Name": "time",
+            },
+        "fields": {
+            "latitude": "1.2949882",
+            "longitude": "103.775472",
+            }
+    }]
+
+client.write_points(location_json)
+
+
 for i in range(1000):
     print("insert a value")
     data_json = [
