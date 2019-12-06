@@ -45,6 +45,7 @@ def main():
                 latency = mean(measure_latency(host='google.com'))
                 respStr = ';'.join(('L', GW_ID, IN_FLG, cIdx, str(latency)))
                 gwUdpClient.sendto(respStr.encode('utf-8'), SEV_IP)
+                print(respStr)
 
 if __name__== "__main__":
     main()
