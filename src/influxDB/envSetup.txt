@@ -1,5 +1,9 @@
 
+admin account: 
+admin/123123
 
+viewer account:
+view.view
 
 
 
