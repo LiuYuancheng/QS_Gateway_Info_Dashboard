@@ -1,4 +1,10 @@
 
+1.dowload and install influxDB: 
+https://portal.influxdata.com/downloads/
+
+2 download and install grafana dashboard.
+https://grafana.com/grafana/download?platform=windows
+
 admin account: 
 admin/123123
 
