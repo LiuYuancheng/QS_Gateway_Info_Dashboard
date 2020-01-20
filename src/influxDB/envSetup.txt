@@ -5,12 +5,20 @@ https://portal.influxdata.com/downloads/
 2 download and install grafana dashboard.
 https://grafana.com/grafana/download?platform=windows
 
+intall the worldmap Panel: 
+https://grafana.com/grafana/plugins/grafana-worldmap-panel/installation
+
+
+
 admin account: 
 admin/123123
 
 viewer account:
 view.view
 
+how to install grafana plug in: 
+cd to: C:\Program Files\GrafanaLabs\grafana\bin
+ 
 
 
 Enable grafana html: 
