@@ -16,7 +16,7 @@ TEST_MODE = True
 def main():
     gwClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     print("load the configure file")
-    
+    count = 0 
     dataDist = None
     with open('gwConfig.json', "r") as fh:
         lines = fh.readlines()
@@ -54,6 +54,32 @@ def main():
                         str(random1["percent_enc"]) ))
         print("msg: %s" % msg)
         gwClient.sendto(msg.encode('utf-8'), ("127.0.0.1", SEV_IP[1]))
+
+        # Check TLS information.
+        
+        with open('tls01_info.json', "r") as fh:
+            lines = fh.readlines()
+            idx = random.randint(0, len(lines)-1)  if TEST_MODE else -1
+            line = lines[idx].rstrip()
+            tlsDict = json.loads(line)
+        if count % 20 == 0:
+            msg = ';'.join( ('T', tlsDict['Src_IP_address'], 
+                str(tlsDict["Dest_IP_address"]),
+                str(tlsDict["TLS_Version"]),
+                str(tlsDict["TLS_Cipher_Suite"]) ))
+            gwClient.sendto(msg.encode('utf-8'), ("127.0.0.1", SEV_IP[1]))
+
+        # Check Key exchange information
+        with open('key_ex_info.json', "r") as fh:
+            lines = fh.readlines()
+            idx = random.randint(0, len(lines)-1)  if TEST_MODE else -1
+            line = lines[idx].rstrip()
+            tlsDict = json.loads(line)
+        if count % 20 == 0:
+            msg = ';'.join( ('K', tlsDict['keyVal'] ))
+            gwClient.sendto(msg.encode('utf-8'), ("127.0.0.1", SEV_IP[1]))
+
+        count += 1
 
 if __name__== "__main__":
     main()

@@ -160,6 +160,7 @@ class DataBaseMgr(object):
             'dstIP'     : '136.132.213.218',
             'tlsVer'    : 'TLS 1.2',
             'cipher'    : 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+            'state'     : 0,
             'updateT'   : time.time()
         }
         gwDict['ip'] = ipAddr

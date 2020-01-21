@@ -7,8 +7,32 @@ import time
 client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gatewayDB')
 
 
-#Add the gatway information
 
+gwDatajson = [
+    {
+        "measurement": "Gateway_00",
+        "tags": {
+            "Name": "time",
+        },
+        "fields": {
+            "ival": float(0),
+            "oval":  float(0),
+            "latVal":  float(0),
+            "pctVal":  float(0),
+            "frgVal":  float(0),
+        }
+    }]
+
+client.write_points(gwDatajson)
+exit()
+
+
+
+
+
+
+
+#Add the gatway information
 
 json_body = [
     {
