@@ -63,6 +63,7 @@ class gwLatServer(object):
         self.droneRsp = RespSer(0, "Latency Server", self)
         self.droneRsp.start()
 
+#-----------------------------------------------------------------------------
     def updateGWData(self, msgList, ipaddr):
         if len(msgList) != 5: return
         print("> %s" %str(msgList))
