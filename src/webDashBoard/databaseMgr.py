@@ -200,6 +200,8 @@ class DataBaseMgr(object):
     def startServer(self):
         while not self.terminate:
             time.sleep(2)
+            print('update data')
+            continue
             # update data every 2 sec
             for key in self.gwDict.keys():
                 self.client.writeGwData(self.gwDict[key]['Name'], self.gwDict[key])
