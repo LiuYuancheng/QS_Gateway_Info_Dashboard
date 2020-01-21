@@ -85,6 +85,7 @@ class gwLatServer(object):
             print(lat)
             gwDict[latKey] = float(lat)
             self.gatewayDict[gwId] = gwDict
+        print(">> %s" %str(self.gatewayDict))
 
     def startSev(self):
         print('Server started')
