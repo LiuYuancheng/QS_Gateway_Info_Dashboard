@@ -64,7 +64,7 @@ class udpServer(object):
         while not self.terminate:
             data, address = self.server.recvfrom(BUFFER_SZ)
             print("Accepted connection from %s" % str(address))
-            msg = handler(msg=data, address=address) if not handler is None else data
+            msg = handler(msg=data, ipAddr=address) if not handler is None else data
             if not msg is None:  # don't response client if the handler feed back is None
                 if not isinstance(msg, bytes): msg = str(msg).encode('utf-8')
                 self.server.sendto(msg, address)

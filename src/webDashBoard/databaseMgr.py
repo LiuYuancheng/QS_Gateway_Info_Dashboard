@@ -128,8 +128,9 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def msgHandler(self, msg=None, ipAddr=None):
-        if not isinstance(msg, bytes): msg = str(msg).encode('utf-8')
+        if isinstance(msg, bytes): msg = msg.decode('utf-8')
         dataList = msg.split(';')
+        print(dataList)
         if dataList[0] == 'L':
             self.addNewGw(msgList=dataList[1:], ipAddr=ipAddr)
         elif dataList[0] == 'D':
@@ -150,11 +151,11 @@ class DataBaseMgr(object):
             'ip'        : ('127.0.0.1', 5005),
             'lat'       : '1.2988',
             'lon'       : '103.836',
-            'inTP'      : 0,
-            'outTP'     : 0,
-            'latency'   : 0,
-            'encptPct'  : 0,
-            'frgVal'    : 0,
+            'inTP'      : 0.0001,
+            'outTP'     : 0.0001,
+            'latency'   : 0.0001,
+            'encptPct'  : 0.0001,
+            'frgVal'    : 0.0001,
             'srcIP'     : '137.132.213.225',
             'dstIP'     : '136.132.213.218',
             'tlsVer'    : 'TLS 1.2',
@@ -171,7 +172,7 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def updateData(self, msgList=None, ipAddr=None):
-        inTP, outTP, encptPct = msgList
+        _, inTP, outTP, encptPct = msgList
         self.gwDict[ipAddr[0]]['inTP'] = float(inTP)
         self.gwDict[ipAddr[0]]['outTP'] = float(outTP)
         self.gwDict[ipAddr[0]]['encptPct'] = float(encptPct)
@@ -201,7 +202,7 @@ class DataBaseMgr(object):
         while not self.terminate:
             time.sleep(2)
             print('update data')
-            continue
+            #continue
             # update data every 2 sec
             for key in self.gwDict.keys():
                 self.client.writeGwData(self.gwDict[key]['Name'], self.gwDict[key])
