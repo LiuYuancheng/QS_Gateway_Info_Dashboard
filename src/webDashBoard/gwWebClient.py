@@ -18,16 +18,19 @@ import json
 import socket
 import random
 import udpCom
+import threading
+from statistics import mean
+from tcp_latency import measure_latency
 
 # Set the constants.
 TEST_MODE = True # test mode flag, set to False when deploy the client.
 DATA_DIR = 'testData' if TEST_MODE else ''
 SEV_IP = ('127.0.0.1', 5005) if TEST_MODE else ('10.0.0.1', 5005)
-GW_CONFIG = os.path.join(DATA_DIR,'gwConfig.json')
+GW_CONFIG = os.path.join(DATA_DIR,'gwCliConfig.json')
 GW_IN_JSON = os.path.join(DATA_DIR,'tp01_in_info.json')
 GW_OUT_JSON = os.path.join(DATA_DIR,'tp01_out_info.json')
-TLS_CM_JSON = os.path.join(DATA_DIR,'tls01_info.json.json')
-KEY_EX_JSON = os.path.join(DATA_DIR,'key_ex_info.jsonn')
+TLS_CM_JSON = os.path.join(DATA_DIR,'tls01_info.json')
+KEY_EX_JSON = os.path.join(DATA_DIR,'key_ex_info.json')
 PERIODIC = 1    # Time periodic to submit the data to the server.
 
 #-----------------------------------------------------------------------------
@@ -41,6 +44,7 @@ class gwWebClient(object):
         self.showConstant()
         self.gwClient = udpCom.udpClient(SEV_IP)
         self.termiate = False
+        self.latency = 0 
         print("load the configure file and login.")
         self.dataDist = None
         with open(GW_CONFIG, "r") as fh:
@@ -53,6 +57,9 @@ class gwWebClient(object):
             print('Loged in the server as a new gateway.')
         else:
             print('Server replay: %s' %str(resp))
+        latThread = threading.Thread(target=self.checkLatency) # Not work: threading.Thread(target=self.checkLatency()) 
+        latThread.daemon = True # here need to use method referring instead of invoking.  
+        latThread.start()       # https://stackoverflow.com/questions/30701983/new-thread-blocks-main-thread
 
 #-----------------------------------------------------------------------------
     def showConstant(self):
@@ -70,6 +77,13 @@ class gwWebClient(object):
         print("===================")
 
 #-----------------------------------------------------------------------------
+    def checkLatency(self):
+        while not self.termiate:
+            time.sleep(5)
+            self.latency = mean(measure_latency(host='google.com'))
+            print(self.latency)
+
+#-----------------------------------------------------------------------------
     def loadJsonData(self, filePath):
         jsonRe = None
         with open(filePath, "r") as fh:
@@ -82,7 +96,8 @@ class gwWebClient(object):
     def startSubmit(self):
         """ submit the data every 1/2 second.
         """
-        count = -1 
+        count = -1
+        print("Start sunmit the data to server.")
         while not self.termiate:
             time.sleep(PERIODIC)
             # Check the trhought put data.
@@ -91,7 +106,8 @@ class gwWebClient(object):
             thrMsg = ';'.join(('D', self.dataDist['gatewayID'],
                                str(thrIn["throughput_mbps"]),
                                str(thrOut["throughput_mbps"]),
-                               str(thrIn["percent_enc"])))
+                               str(thrIn["percent_enc"]),
+                               str(self.latency) ))
             self.gwClient.sendMsg(thrMsg, resp=False)
             # Check TLS information.
             tlsDict = self.loadJsonData(TLS_CM_JSON)
@@ -108,6 +124,10 @@ class gwWebClient(object):
                 self.gwClient.sendMsg(keyMsg, resp=False)
             count += 1 
 
+
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 def main():
     client = gwWebClient(None)
     client.startSubmit()

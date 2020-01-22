@@ -11,12 +11,12 @@
 # License:     
 #-----------------------------------------------------------------------------
 
-
-
 import time
 import threading
 from datetime import datetime
+from statistics import mean
 from influxdb import InfluxDBClient
+from tcp_latency import measure_latency
 
 import udpCom
 
@@ -135,10 +135,16 @@ class DataBaseMgr(object):
         self.gwDict = {}
         self.tlsFlag = False    # new tls data incomming flag.
         self.terminate = False
+        self.latency = 0.0001
         self.client = InfluxCli(
             ipAddr=('localhost', 8086), dbInfo=('root', 'root', 'gatewayDB'))
+        # TCP server thread.
         server = servThread(self, 0, "server thread")
         server.start()
+        # laterncy check thread:
+        latThread = threading.Thread(target=self.checkLatency) # Not work: threading.Thread(target=self.checkLatency()) 
+        latThread.daemon = True # here need to use method referring instead of invoking.  
+        latThread.start()       # https://stackoverflow.com/questions/30701983/new-thread-blocks-main-thread
 
 #-----------------------------------------------------------------------------
     def msgHandler(self, msg=None, ipAddr=None):
@@ -157,6 +163,12 @@ class DataBaseMgr(object):
         elif dataList[0] == 'K':
             self.updateKeyEx(msgList=dataList[1:], ipAddr=ipAddr)
 
+#-----------------------------------------------------------------------------
+    def checkLatency(self):
+        while not self.terminate:
+            time.sleep(5)
+            self.latency = mean(measure_latency(host='google.com'))
+            
 #-----------------------------------------------------------------------------
     def addNewGw(self, msgList=None, ipAddr=None):
         if ipAddr in self.gwDict.keys(): return False
@@ -189,10 +201,12 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def updateData(self, msgList=None, ipAddr=None):
-        _, inTP, outTP, encptPct = msgList
+        _, inTP, outTP, encptPct, latency = msgList
         self.gwDict[ipAddr[0]]['inTP'] = float(inTP)
         self.gwDict[ipAddr[0]]['outTP'] = float(outTP)
         self.gwDict[ipAddr[0]]['encptPct'] = float(encptPct)
+        print((float(latency), self.latency))
+        self.gwDict[ipAddr[0]]['latency'] = abs(float(latency)-self.latency)/2.0
 
 #-----------------------------------------------------------------------------
     def updateTls(self, msgList=None, ipAddr=None):
