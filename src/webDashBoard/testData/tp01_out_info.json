@@ -82,7 +82,7 @@
 {"timestamp":"Tue Nov 19 12:08:32 2019","throughput_mbps":0.3,"percent_enc":86.7,"pkt_count":15}
 {"timestamp":"Tue Nov 19 12:08:34 2019","throughput_mbps":0.1,"percent_enc":75.0,"pkt_count":4}
 {"timestamp":"Tue Nov 19 12:09:15 2019","throughput_mbps":0.0,"percent_enc":0.0,"pkt_count":1}
-{"timestamp":"Tue Nov 19 12:09:17 2019","throughput_mbps":0.4,"percent_enc":82.4,"pkt_count":17}{"timestamp":"Tue Nov 19 12:07:23 2019","throughput_mbps":609.3,"percent_enc":0.0,"pkt_count":47476}
+{"timestamp":"Tue Nov 19 12:09:17 2019","throughput_mbps":0.4,"percent_enc":82.4,"pkt_count":17}
 {"timestamp":"Tue Nov 19 12:07:25 2019","throughput_mbps":600.8,"percent_enc":0.0,"pkt_count":47126}
 {"timestamp":"Tue Nov 19 12:07:27 2019","throughput_mbps":528.9,"percent_enc":0.0,"pkt_count":41469}
 {"timestamp":"Tue Nov 19 12:07:29 2019","throughput_mbps":278.6,"percent_enc":0.0,"pkt_count":21706}
