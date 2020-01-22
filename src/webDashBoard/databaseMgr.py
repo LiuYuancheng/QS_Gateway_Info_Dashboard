@@ -1,3 +1,17 @@
+#!/usr/bin/python
+#-----------------------------------------------------------------------------
+# Name:        udpCom.py
+#
+# Purpose:     This module will provide a UDP client and server communication API.
+#
+# Author:      Yuancheng Liu
+#
+# Created:     2019/01/15
+# Copyright:   
+# License:     
+#-----------------------------------------------------------------------------
+
+
 
 import time
 import threading
@@ -132,7 +146,8 @@ class DataBaseMgr(object):
         dataList = msg.split(';')
         print(dataList)
         if dataList[0] == 'L':
-            self.addNewGw(msgList=dataList[1:], ipAddr=ipAddr)
+            resp = 'R;L' if self.addNewGw(msgList=dataList[1:], ipAddr=ipAddr) else 'R;E'
+            return resp
         elif dataList[0] == 'D':
             self.updateData(msgList=dataList[1:], ipAddr=ipAddr)
         elif dataList[0] == 'T':
@@ -144,7 +159,7 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def addNewGw(self, msgList=None, ipAddr=None):
-        if ipAddr in self.gwDict.keys(): return
+        if ipAddr in self.gwDict.keys(): return False
         name, lat, lon = msgList
         gwDict = {
             'Name'      : 'GateWay_00',
@@ -170,6 +185,7 @@ class DataBaseMgr(object):
         print("Add the new gw <%s> " %str(gwDict))
         self.gwDict[ipAddr[0]] = gwDict
         self.client.writeGPSData(gwDict)
+        return True
 
 #-----------------------------------------------------------------------------
     def updateData(self, msgList=None, ipAddr=None):
