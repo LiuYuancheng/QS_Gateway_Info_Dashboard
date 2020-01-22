@@ -1,0 +1,20 @@
+{"Time":"Tue Nov 19 12:05:36 2019","Src_IP_address":"74.125.130.149","Dest_IP_address":"192.168.0.2","TLS_Version":"unknown","TLS_Cipher_Suite":"unknown"}
+{"Time":"Tue Nov 19 12:05:40 2019","Src_IP_address":"13.224.253.105","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:06:16 2019","Src_IP_address":"74.125.130.148","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:06:54 2019","Src_IP_address":"13.251.201.122","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:06:59 2019","Src_IP_address":"13.228.40.187","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:07:00 2019","Src_IP_address":"13.228.63.189","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:07:00 2019","Src_IP_address":"13.228.186.15","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:07:38 2019","Src_IP_address":"74.125.24.94","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:10:40 2019","Src_IP_address":"13.35.8.91","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:15:40 2019","Src_IP_address":"13.35.8.77","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:19:04 2019","Src_IP_address":"74.125.24.138","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:20:40 2019","Src_IP_address":"13.224.253.11","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:25:40 2019","Src_IP_address":"13.35.8.95","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:30:40 2019","Src_IP_address":"13.35.8.77","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:34:19 2019","Src_IP_address":"13.229.220.58","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:35:40 2019","Src_IP_address":"13.35.8.91","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:40:40 2019","Src_IP_address":"13.35.8.88","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:45:40 2019","Src_IP_address":"13.35.8.88","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:50:40 2019","Src_IP_address":"13.35.8.91","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"}
+{"Time":"Tue Nov 19 12:52:14 2019","Src_IP_address":"74.125.68.95","Dest_IP_address":"192.168.0.2","TLS_Version":"TLS 1.2","TLS_Cipher_Suite":"TLS_AES_128_GCM_SHA256"}
