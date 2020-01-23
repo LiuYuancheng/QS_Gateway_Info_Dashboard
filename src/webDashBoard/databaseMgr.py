@@ -1,8 +1,10 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        udpCom.py
+# Name:        databaseMgr.py
 #
-# Purpose:     This module will provide a UDP client and server communication API.
+# Purpose:     This module will provide a influx database manager to collect the 
+#              gateway feed back data by UDP and insert to influx database which
+#              will be used for the grafana dashboard.
 #
 # Author:      Yuancheng Liu
 #
@@ -13,8 +15,9 @@
 
 import time
 import threading
-from datetime import datetime
 from statistics import mean
+from datetime import datetime
+
 from influxdb import InfluxDBClient
 from tcp_latency import measure_latency
 
@@ -22,22 +25,29 @@ import udpCom
 
 UDP_PORT = 5005
 TEST_MODE = False   # test mode flag.
+LAT_PERIOD = 5      # latency periodic check time.
+RPT_PERIOD = 2      # time period to insert the data to data base.
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class InfluxCli(object):
-    """ UDP client module."""
+    """ Client to connect to the influx db and insert data."""
     def __init__(self, ipAddr=None, dbInfo=None):
-        """ Create an ipv4 (AF_INET) socket object using the udp protocol (SOCK_DGRAM)
-            init example: client = udpClient(('127.0.0.1', 502))
+        """ Init the influx DB client to login to the data base. dbInfo: name, 
+            password, databaseName. init example: 
+            client = InfluxCli(ipAddr=('127.0.0.1', 8086), dbinfo=('root', 'root', 'gatewayDB'))
         """
         (ip, port) = ipAddr if ipAddr else ('localhost', 8086)
-        (user, pwd, dbName) = dbInfo if dbInfo and len(dbInfo)==3 else ('root', 'root', 'gatewayDB')
+        (user, pwd, dbName) = dbInfo if dbInfo and len(
+            dbInfo) == 3 else ('root', 'root', 'gatewayDB')
         #self.dbClient = InfluxDBClient('localhost', 8086, 'root', 'root', 'quantumGWDB')
         self.dbClient = InfluxDBClient(ip, port, user, pwd, dbName)
 
 #-----------------------------------------------------------------------------
     def writeGwData(self, gwName, dataDict):
+        """ Write the gateway data to the related gateway table based on gateway 
+            name. 
+        """
         gwDatajson = [
             {
                 "measurement": str(gwName),
@@ -56,6 +66,7 @@ class InfluxCli(object):
 
 #-----------------------------------------------------------------------------
     def writeTLSData(self, dataDict):
+        """ Write the TLS information. """
         tlsJson = [
             {
                 "measurement": "tlsConn",
@@ -72,9 +83,9 @@ class InfluxCli(object):
             }]
         self.dbClient.write_points(tlsJson)
 
-
 #-----------------------------------------------------------------------------
     def writeKeyExData(self, keyVal):
+        """ Write the key exchange data. """
         kexJson = [
             {
                 "measurement": "keyEx",
@@ -89,6 +100,7 @@ class InfluxCli(object):
 
 #-----------------------------------------------------------------------------
     def writeGPSData(self, dataDict):
+        """ Write the gateway GPS information."""
         locationJson = [
             {
                 "measurement": "location",
@@ -104,12 +116,13 @@ class InfluxCli(object):
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
-class servThread(threading.Thread):
-    """ Thread to test the UDP server/insert the tcp server in other program.""" 
+class ServThread(threading.Thread):
+    """ Server thread to generate a UDP server to handle the gateway client's
+        feedback data.
+    """ 
     def __init__(self, parent, threadID, name):
         threading.Thread.__init__(self)
         self.parent = parent
-        self.threadName = name
         self.server = udpCom.udpServer(None, UDP_PORT)
 
     def run(self):
@@ -117,7 +130,6 @@ class servThread(threading.Thread):
         print("Server thread run() start.")
         self.server.serverStart(handler=self.parent.msgHandler)
         print("Server thread run() end.")
-        self.threadName = None # set the thread name to None when finished.
 
     def stop(self):
         """ Stop the udp server. Create a endclient to bypass the revFrom() block."""
@@ -129,17 +141,19 @@ class servThread(threading.Thread):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class DataBaseMgr(object):
-    """ UDP client module."""
+    """ Main database manger program."""
     def __init__(self, parent):
- 
+        """ Init the gateway information storage dictionary, all the parameters
+            and the latency check thread.
+        """
         self.gwDict = {}
         self.tlsFlag = False    # new tls data incomming flag.
         self.terminate = False
-        self.latency = 0.0001
+        self.latency = 0.0001   # tcp latency from host computer to google
         self.client = InfluxCli(
             ipAddr=('localhost', 8086), dbInfo=('root', 'root', 'gatewayDB'))
         # TCP server thread.
-        server = servThread(self, 0, "server thread")
+        server = ServThread(self, 0, "server thread")
         server.start()
         # laterncy check thread:
         latThread = threading.Thread(target=self.checkLatency) # Not work: threading.Thread(target=self.checkLatency()) 
@@ -148,9 +162,10 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def msgHandler(self, msg=None, ipAddr=None):
+        """ handle the feed back message."""
         if isinstance(msg, bytes): msg = msg.decode('utf-8')
         dataList = msg.split(';')
-        print(dataList)
+        #print(dataList)
         if dataList[0] == 'L':
             resp = 'R;L' if self.addNewGw(msgList=dataList[1:], ipAddr=ipAddr) else 'R;E'
             return resp
@@ -165,30 +180,32 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def checkLatency(self):
+        """ Check latency every periodic time. """
         while not self.terminate:
-            time.sleep(5)
+            time.sleep(LAT_PERIOD)
             self.latency = mean(measure_latency(host='google.com'))
             
 #-----------------------------------------------------------------------------
     def addNewGw(self, msgList=None, ipAddr=None):
+        """ Add a new gateway in the gateway dictionary."""
         if ipAddr in self.gwDict.keys(): return False
         name, lat, lon = msgList
         gwDict = {
-            'Name'      : 'GateWay_00',
-            'ip'        : ('127.0.0.1', 5005),
-            'lat'       : '1.2988',
-            'lon'       : '103.836',
-            'inTP'      : 0.0001,
-            'outTP'     : 0.0001,
-            'latency'   : 0.0001,
-            'encptPct'  : 0.0001,
-            'frgVal'    : 0.0001,
-            'srcIP'     : '137.132.213.225',
-            'dstIP'     : '136.132.213.218',
-            'tlsVer'    : 'TLS 1.2',
-            'cipher'    : 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
-            'state'     : 0,
-            'updateT'   : time.time()
+            'Name'      : 'GateWay_00',         # Gateway name 
+            'ip'        : ('127.0.0.1', 5005),  # IP address
+            'lat'       : '1.2988',             # GPS latitude 
+            'lon'       : '103.836',            # GPS longitude 
+            'inTP'      : 0.0001,               # Incoming throughtput
+            'outTP'     : 0.0001,               # Outgoing throughtput
+            'latency'   : 0.0001,               # Latency: (gateway latency - host latency)/2
+            'encptPct'  : 0.0001,               # Data packet encription rate.
+            'frgVal'    : 0.0001,               # Fragment value
+            'srcIP'     : '137.132.213.225',    # TLS source ip address
+            'dstIP'     : '136.132.213.218',    # TLS destination ip address
+            'tlsVer'    : 'TLS 1.2',            # TLS version
+            'cipher'    : 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', # TLS cipher data.
+            'state'     : 0,                    # Quantum saft level: 0 not safe, >0 safe
+            'updateT'   : time.time()           # Gateway last report time.
         }
         gwDict['ip'] = ipAddr
         gwDict['Name'] = name
@@ -201,6 +218,7 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def updateData(self, msgList=None, ipAddr=None):
+        """ Update the gateway data. """
         _, inTP, outTP, encptPct, latency = msgList
         self.gwDict[ipAddr[0]]['inTP'] = float(inTP)
         self.gwDict[ipAddr[0]]['outTP'] = float(outTP)
@@ -210,6 +228,7 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def updateTls(self, msgList=None, ipAddr=None):
+        """ Update the TLS data. """
         srcIP, dstIP, tlsVer, cipher = msgList
         self.gwDict[ipAddr[0]]['srcIP'] = srcIP
         self.gwDict[ipAddr[0]]['dstIP'] = dstIP
@@ -219,20 +238,22 @@ class DataBaseMgr(object):
 
 #-----------------------------------------------------------------------------
     def updateLatency(self, msgList=None, ipAddr=None):
+        """ Update the latency data. """
         latency = float(msgList[0])
         for key in self.gwDict.keys():
             self.gwDict[key]['latency'] = latency
 
 #-----------------------------------------------------------------------------
     def updateKeyEx(self, msgList=None, ipAddr=None):
+        """ Update the key exchange record."""
         keyVal = msgList[0]
         self.client.writeKeyExData(keyVal)
 
 #-----------------------------------------------------------------------------
     def startServer(self):
         while not self.terminate:
-            time.sleep(2)
-            print('update data')
+            time.sleep(RPT_PERIOD)
+            print('update data.')
             #continue
             # update data every 2 sec
             for key in self.gwDict.keys():
