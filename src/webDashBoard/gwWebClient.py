@@ -2,7 +2,8 @@
 #-----------------------------------------------------------------------------
 # Name:        gwWebClient.py
 #
-# Purpose:     This module will provide a UDP client and server communication API.
+# Purpose:     This module will provide a UDP client to load the gateway local
+#              log files and feed the parsed data to the server. 
 #
 # Author:      Yuancheng Liu
 #
@@ -31,20 +32,21 @@ GW_IN_JSON = os.path.join(DATA_DIR,'tp01_in_info.json')
 GW_OUT_JSON = os.path.join(DATA_DIR,'tp01_out_info.json')
 TLS_CM_JSON = os.path.join(DATA_DIR,'tls01_info.json')
 KEY_EX_JSON = os.path.join(DATA_DIR,'key_ex_info.json')
-PERIODIC = 1    # Time periodic to submit the data to the server.
+LAT_PERIOD = 5      # latency periodic check time.
+RPT_PERIOD = 2      # time period to insert the data to data base.
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class gwWebClient(object):
     """ UDP client module."""
     def __init__(self, parent):
-        """ Create an ipv4 (AF_INET) socket object using the udp protocol (SOCK_DGRAM)
-            init example: client = udpClient(('127.0.0.1', 502))
+        """ Create a client to login to the server and submit the gateway log's data.
+            init example: client = gwWebClient(None)
         """
         self.showConstant()
         self.gwClient = udpCom.udpClient(SEV_IP)
-        self.termiate = False
-        self.latency = 0 
+        self.latency = 0.0001
+        self.terminate = False
         print("load the configure file and login.")
         self.dataDist = None
         with open(GW_CONFIG, "r") as fh:
@@ -54,7 +56,7 @@ class gwWebClient(object):
         print("send the login message: <%s>" %str(loginStr))
         resp = self.gwClient.sendMsg(loginStr, resp=True)
         if resp.decode('utf-8') == 'R;L':
-            print('Loged in the server as a new gateway.')
+            print('Login the server as a new gateway.')
         else:
             print('Server replay: %s' %str(resp))
         latThread = threading.Thread(target=self.checkLatency) # Not work: threading.Thread(target=self.checkLatency()) 
@@ -63,8 +65,7 @@ class gwWebClient(object):
 
 #-----------------------------------------------------------------------------
     def showConstant(self):
-        """ Show all the constants
-        """
+        """ Show all the configured constants. """
         print("Execution constants : ")
         print("Test mode : %s " %str(TEST_MODE))
         print("Server IP : %s " %str(SEV_IP))
@@ -78,13 +79,15 @@ class gwWebClient(object):
 
 #-----------------------------------------------------------------------------
     def checkLatency(self):
-        while not self.termiate:
-            time.sleep(5)
+        """ Check latency every periodic time. """
+        while not self.terminate:
+            time.sleep(LAT_PERIOD)
             self.latency = mean(measure_latency(host='google.com'))
             print(self.latency)
 
 #-----------------------------------------------------------------------------
     def loadJsonData(self, filePath):
+        """ Load the Json file and return the Json object."""
         jsonRe = None
         with open(filePath, "r") as fh:
             lines = fh.readlines()
@@ -94,12 +97,11 @@ class gwWebClient(object):
 
 #-----------------------------------------------------------------------------
     def startSubmit(self):
-        """ submit the data every 1/2 second.
-        """
+        """ Submit the data every 1/2 second. """
         count = -1
         print("Start sunmit the data to server.")
-        while not self.termiate:
-            time.sleep(PERIODIC)
+        while not self.terminate:
+            time.sleep(RPT_PERIOD)
             # Check the trhought put data.
             thrIn = self.loadJsonData(GW_IN_JSON)
             thrOut = self.loadJsonData(GW_OUT_JSON)
@@ -124,8 +126,6 @@ class gwWebClient(object):
                 self.gwClient.sendMsg(keyMsg, resp=False)
             count += 1 
 
-
-
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 def main():
@@ -134,8 +134,6 @@ def main():
 
 if __name__== "__main__":
     main()
-# Create a UDP socket
-
 
 
 
