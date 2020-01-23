@@ -1,39 +1,39 @@
+Steps to setup the program on windows system
 
 1.dowload and install influxDB: 
-https://portal.influxdata.com/downloads/
+- https://portal.influxdata.com/downloads/
+- Run influxd.exe
 
 2 download and install grafana dashboard.
-https://grafana.com/grafana/download?platform=windows
+- https://grafana.com/grafana/download?platform=windows
+- Change the config files(C:\Program Files\GrafanaLabs\grafana\conf\) to enable the HTML:
+    file: custom.ini
+    [panels]
+    # If set to true Grafana will allow script tags in text panels. Not recommended as it enable XSS vulnerabilities.
+    disable_sanitize_html = true
 
-how to install grafana plug in: 
-cd to: C:\Program Files\GrafanaLabs\grafana\bin
+    file: default.ini
+    [panels]
+    # here for to support old env variables, can remove after a few months
+    enable_alpha = false
+    disable_sanitize_html = true
 
-intall the worldmap Panel: 
-https://grafana.com/grafana/plugins/grafana-worldmap-panel/installation
+3. Install needed grafana plugin:    
+    - how to install grafana plug in: 
+        cd to: C:\Program Files\GrafanaLabs\grafana\bin and run grafana-cli.exe
 
-install AJAX panel to support javascript: 
-https://grafana.com/grafana/plugins/ryantxu-ajax-panel/installation
+    - intall the worldmap Panel: 
+        https://grafana.com/grafana/plugins/grafana-worldmap-panel/installation
 
-isntall trackmap: 
-https://grafana.com/grafana/plugins/pr0ps-trackmap-panel/installation
+    - install AJAX panel to support javascript: 
+        https://grafana.com/grafana/plugins/ryantxu-ajax-panel/installation
 
-admin account: 
-admin/123123
+    - isntall trackmap: 
+        https://grafana.com/grafana/plugins/pr0ps-trackmap-panel/installation
 
-viewer account:
-view.view
+4. Set the grafana account and log the datash board
+    - Set the account(username/password), defualt is admin/admin:  
+        admin account:  admin/123123 
+        viewer account: view/view
+    - Select "Import" in the "Create" tab and upload the latest json file from the folder "grafanaJson"
 
-execute influxd.exe
-
-
-Enable grafana html: 
-file: custom.ini
-[panels]
-# If set to true Grafana will allow script tags in text panels. Not recommended as it enable XSS vulnerabilities.
-disable_sanitize_html = true
-
-file: default.ini
-[panels]
-# here for to support old env variables, can remove after a few months
-enable_alpha = false
-disable_sanitize_html = true
