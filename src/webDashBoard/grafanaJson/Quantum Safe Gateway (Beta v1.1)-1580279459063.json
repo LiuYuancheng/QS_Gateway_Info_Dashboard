@@ -1,0 +1,1358 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Dashboard to show the quantum safe gateway information.",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 8,
+  "links": [],
+  "panels": [
+    {
+      "content": "![Image](https://news-cdn.softpedia.com/images/news2/SingTel-Signs-Deal-to-Acquire-Trustwave-for-810-Million-477967-2.jpg)\n",
+      "datasource": null,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "id": 19,
+      "mode": "markdown",
+      "options": {},
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "",
+      "type": "text"
+    },
+    {
+      "content": "<table>\r\n    <caption>Gateway Detail</caption>\r\n    <thead>\r\n        <tr>\r\n            <th colspan=\"2\"><strong>Gateway ID</strong> : Gateway_00 </th>\r\n            <th>IP address: 10.10.10.2 </th>\r\n        </tr>\r\n        <td colspan=\"2\">\r\n        <strong>Quantum Encryption Detail</strong>\r\n        </td>\r\n        <tr>\r\n            <td colspan=\"1\"> <strong>Gateway Version : <br> DPDK Lib Version : <br> Crypt Mode : <br> DPDK Encryption : <br> Key Exchange </strong>\r\n            </td>\r\n            <td colspan=\"3\"> V1.01_beta <br> 19.08 <br> Openssl<br> AES-CBC 256 <br> Customized </td>\r\n        </tr>\r\n    </thead>\r\n    <tbody>\r\n        <tr>\r\n            <th colspan=\"2\"> Deployed Time : 2020-02-07_09:23:12\r\n            <th> GPS Position : [ 1.2988,103.836 ]</th>\r\n        </tr>\r\n        <tr>\r\n            <td colspan=\"1\">Gateway Computer CPU : </td>\r\n            <td colspan=\"3\">Intel(R)i7-8700</td>\r\n        </tr>\r\n        <tr>\r\n            <td colspan=\"1\">Gateway Computer RAM : </td>\r\n            <td colspan=\"3\">8GB-DDR4 1333Hz</td>\r\n        </tr>\r\n    </tbody>\r\n</table>",
+      "datasource": null,
+      "gridPos": {
+        "h": 9,
+        "w": 7,
+        "x": 4,
+        "y": 0
+      },
+      "id": 4,
+      "mode": "html",
+      "options": {},
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Deployed Gateway Information",
+      "type": "text"
+    },
+    {
+      "autoZoom": true,
+      "datasource": "gatewayDB",
+      "gridPos": {
+        "h": 9,
+        "w": 7,
+        "x": 11,
+        "y": 0
+      },
+      "hideTimeOverride": false,
+      "id": 29,
+      "interval": "1s",
+      "lineColor": "#1F60C4",
+      "maxDataPoints": 10,
+      "options": {},
+      "pointColor": "#C4162A",
+      "targets": [
+        {
+          "alias": "gateway locaion",
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "limit": "",
+          "measurement": "location",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"latitude\"), last(\"longitude\") FROM \"location\" WHERE (\"Name\" = 'time') AND $timeFilter GROUP BY time($interval)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "latitude"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "longitude"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "Name",
+              "operator": "=",
+              "value": "time"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "1h",
+      "timeShift": null,
+      "title": "Gateway Geo-Location",
+      "type": "pr0ps-trackmap-panel"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 16,
+      "interval": "1h",
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "last"
+          ],
+          "defaults": {
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 15
+              },
+              {
+                "color": "#EAB839",
+                "value": 30
+              },
+              {
+                "color": "red",
+                "value": 60
+              }
+            ],
+            "unit": "ms"
+          },
+          "override": {},
+          "values": false
+        },
+        "orientation": "horizontal"
+      },
+      "pluginVersion": "6.4.4",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "0"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "latVal"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": "10s",
+      "timeShift": null,
+      "title": "Gateway Latency [millisecond]",
+      "type": "bargauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "gatewayDB",
+      "decimals": null,
+      "description": "Incoming Throughput:\n- Gate way average incoming data packed speed.\n- unit: Mbps",
+      "fill": 6,
+      "fillGradient": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 2
+      },
+      "id": 18,
+      "interval": "1s",
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "sideWidth": null,
+        "sort": null,
+        "sortDesc": null,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "latency",
+          "color": "#FF7383",
+          "fill": 0
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
+      "targets": [
+        {
+          "alias": "latency",
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "0"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "limit": "1000",
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"ival\") FROM \"thoughput\" WHERE $timeFilter GROUP BY time($interval) LIMIT 1000",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "latVal"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "ms",
+          "label": "ms",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "content": "![Image](https://media.giphy.com/media/xTiTnxpQ3ghPiB2Hp6/giphy.gif)\t\n",
+      "datasource": null,
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 4
+      },
+      "id": 6,
+      "mode": "markdown",
+      "options": {},
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "",
+      "type": "text"
+    },
+    {
+      "datasource": "gatewayDB",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 9
+      },
+      "hideTimeOverride": false,
+      "id": 8,
+      "interval": "1h",
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "decimals": 0,
+            "mappings": [
+              {
+                "from": "",
+                "id": 1,
+                "operator": "",
+                "text": "",
+                "to": "",
+                "type": 1,
+                "value": ""
+              }
+            ],
+            "max": 300,
+            "min": 0,
+            "thresholds": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "dark-orange",
+                "value": 50
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "semi-dark-green",
+                "value": 150
+              },
+              {
+                "color": "dark-blue",
+                "value": 200
+              }
+            ],
+            "unit": "Mbits"
+          },
+          "override": {},
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.4.4",
+      "repeat": null,
+      "targets": [
+        {
+          "alias": "dfsg",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"ival\" FROM \"dataVals\" WHERE (\"Name\" = 'select tag value') AND $timeFilter GROUP BY time(1s) fill(previous)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "ival"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": "10s",
+      "timeShift": null,
+      "title": "Incoming Throughput [Mbps]",
+      "type": "gauge"
+    },
+    {
+      "datasource": "gatewayDB",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 9
+      },
+      "hideTimeOverride": false,
+      "id": 12,
+      "interval": "1h",
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "decimals": 0,
+            "mappings": [
+              {
+                "from": "",
+                "id": 1,
+                "operator": "",
+                "text": "",
+                "to": "",
+                "type": 1,
+                "value": ""
+              }
+            ],
+            "max": 300,
+            "min": 0,
+            "thresholds": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "dark-orange",
+                "value": 50
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "semi-dark-green",
+                "value": 150
+              },
+              {
+                "color": "dark-blue",
+                "value": 200
+              }
+            ],
+            "unit": "Mbits"
+          },
+          "override": {},
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.4.4",
+      "repeat": null,
+      "targets": [
+        {
+          "alias": "wqer",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"cpu_load_short\" WHERE $timeFilter",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "oval"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": "10s",
+      "timeShift": null,
+      "title": "Outgoing Throughput [Mbps]",
+      "type": "gauge"
+    },
+    {
+      "columns": [],
+      "datasource": "gatewayDB",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 23,
+      "interval": "1h",
+      "options": {},
+      "pageSize": 3,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "sanitize": false,
+          "type": "date"
+        },
+        {
+          "alias": "Source IP ",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "tlsConn.src",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Destination IP",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "tlsConn.dest",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "TLS Version",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "tlsConn.ver",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "TLS Cipher",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "tlsConn.cipher",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Quantum Safe",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "tlsConn.state",
+          "thresholds": [
+            "-2",
+            "1"
+          ],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "tlsConn",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"src\", \"dest\", \"ver\", \"cipher\", \"state\" FROM \"tlsConn\" ",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "TLS Connection Information",
+      "transform": "timeseries_to_columns",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "gatewayDB",
+      "decimals": null,
+      "description": "Incoming Throughput:\n- Gate way average incoming data packed speed.\n- unit: Mbps",
+      "fill": 3,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 6,
+        "x": 0,
+        "y": 14
+      },
+      "id": 10,
+      "interval": "1s",
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "sort": null,
+        "sortDesc": null,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 0.5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "thoughput",
+          "nullPointMode": "connected"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "thoughput",
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "hide": false,
+          "limit": "1000",
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"ival\") FROM \"thoughput\" WHERE $timeFilter GROUP BY time($interval) LIMIT 1000",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "ival"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "Name",
+              "operator": "=",
+              "value": "time"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Incoming Throughput Speed [Mbps]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Mbps",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "gatewayDB",
+      "decimals": null,
+      "description": "Incoming Throughput:\n- Gate way average incoming data packed speed.\n- unit: Mbps",
+      "fill": 3,
+      "fillGradient": 4,
+      "gridPos": {
+        "h": 11,
+        "w": 6,
+        "x": 6,
+        "y": 14
+      },
+      "id": 14,
+      "interval": "1s",
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "sort": null,
+        "sortDesc": null,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "thoughput",
+          "color": "#F2CC0C",
+          "lines": true,
+          "nullPointMode": "connected"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "thoughput",
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "hide": false,
+          "limit": "1000",
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"ival\") FROM \"thoughput\" WHERE $timeFilter GROUP BY time($interval) LIMIT 1000",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "oval"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Outgoing Throughput Speed [Mbps]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Mbps",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "cacheTimeout": null,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fill": 3,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 6,
+        "x": 12,
+        "y": 14
+      },
+      "id": 25,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "connected",
+      "options": {
+        "dataLinks": [
+          {
+            "title": "",
+            "url": ""
+          }
+        ]
+      },
+      "percentage": false,
+      "pluginVersion": "6.4.4",
+      "pointradius": 1,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "percent",
+          "color": "#1F60C4",
+          "lines": true,
+          "nullPointMode": "connected"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "percent",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "1000",
+          "measurement": "Gateway_00",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "pctVal"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Percentage of Packets Protected by Gateway",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 3,
+          "format": "short",
+          "label": "%",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 14
+      },
+      "header_js": "{}",
+      "id": 27,
+      "method": "iframe",
+      "mode": "html",
+      "options": {},
+      "params_js": "{}",
+      "request": "http",
+      "responseType": "text",
+      "showErrors": true,
+      "showTime": false,
+      "showTimeFormat": "LTS",
+      "showTimePrefix": null,
+      "showTimeValue": "request",
+      "skipSameURL": true,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "templateResponse": true,
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Gateway function control",
+      "type": "ryantxu-ajax-panel",
+      "url": "http://127.0.0.1:5000/",
+      "withCredentials": false
+    },
+    {
+      "columns": [],
+      "datasource": "gatewayDB",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 19
+      },
+      "id": 31,
+      "interval": "1s",
+      "options": {},
+      "pageSize": null,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "sanitize": false,
+          "type": "date"
+        },
+        {
+          "alias": "Key Signature",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "keyEx.val",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "measurement": "keyEx",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"val\" FROM \"keyEx\" ",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "val"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Key Exchange Information",
+      "transform": "timeseries_to_columns",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 20,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": false,
+    "refresh_intervals": [
+      "2s",
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "Quantum Safe Gateway (Beta v1.1)",
+  "uid": "kKqGGZsWk",
+  "version": 21
+}

@@ -3,10 +3,10 @@
 # Name:        attackHost.py [python2.7/python3]
 #
 # Purpose:     This module is used to create a flask http server on port 5000 
-#              to control the PLC-railway system attack.
+#              to send the gateway control cmd
 # Author:      Yuancheng Liu
 #
-# Created:     2020/01/03
+# Created:     2020/01/29
 # Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
 # License:     YC
 #-----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ from flask import Flask, redirect, url_for, request, render_template
 
 TEST_MODE = True # Test mode flag - True: test on local computer
 
-SEV_IP = ('127.0.0.1', 5005) if TEST_MODE else ('192.168.10.244', 5006)
+SEV_IP = ('127.0.0.1', 5006) if TEST_MODE else ('192.168.10.244', 5006)
 BUFFER_SZ = 1024
 
 # Init the UDP send server
