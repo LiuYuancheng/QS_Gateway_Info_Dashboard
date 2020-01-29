@@ -11,13 +11,11 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import socket
-import requests
 from flask import Flask, redirect, url_for, request, render_template
 
 TEST_MODE = True # Test mode flag - True: test on local computer
 
-SEV_IP = ('127.0.0.1', 5005) if TEST_MODE else ('192.168.10.244', 5005)
-ACT_IP = ('127.0.0.1', 8000) if TEST_MODE else('192.168.10.251', 8080)
+SEV_IP = ('127.0.0.1', 5005) if TEST_MODE else ('192.168.10.244', 5006)
 BUFFER_SZ = 1024
 
 # Init the UDP send server
@@ -37,68 +35,32 @@ def index():
 def json():
     return render_template('index.html')
 
-#background process happening without any refreshing
-@app.route('/startAtt1')
+#Start the gateway encryption.
+@app.route('/enableEncrypt')
 def startAtt1():
-    print ("Start the black out attack.")
+    print ("Start the gateway encryption.")
     if request.method == 'GET':
-        urlStr = "http://"+ACT_IP[0]+":"+str(ACT_IP[1])+"/BE3"
-        requests.get(url = urlStr) 
+        msg = 'T;1'
+        crtClient.sendto(msg.encode('utf-8'), SEV_IP)
     return ("nothing")
 
-#background process happening without any refreshing
-@app.route('/stopAtt1')
+#Disable the gateway encryption
+@app.route('/disableEncrypt')
 def stopAtt1():
-    print ("Stop the black out attack.")
+    print ("Disable the gateway encryption")
     if request.method == 'GET':
-        msg = 'A;0'
+        msg = 'T;0'
         crtClient.sendto(msg.encode('utf-8'), SEV_IP)
-        return redirect(url_for('index'))
     return ("nothing")
 
-@app.route('/startAtt2')
+# Start the key exchange
+@app.route('/exchangeKey')
 def startAtt2():
-    print ("Start the false data injection attack.")
+    print ("Start the key exchange.")
     if request.method == 'GET':
-        msg = 'A;2'
+        msg = 'T;2'
         crtClient.sendto(msg.encode('utf-8'), SEV_IP)
-        return redirect(url_for('index'))
     return ("nothing")
-
-#background process happening without any refreshing
-@app.route('/stopAtt2')
-def stopAtt2():
-    print ("top the false data injection attack.")
-    if request.method == 'GET':
-        msg = 'A;0'
-        crtClient.sendto(msg.encode('utf-8'), SEV_IP)
-        return redirect(url_for('index'))
-    return ("nothing")
-
-@app.route('/index', methods = ['POST', 'GET'])
-def login():
-    if request.method == 'POST':
-        if request.form['submit_button'] == 'startAtt1':
-            urlStr = "http://"+ACT_IP[0]+":"+str(ACT_IP[1])+"/BE3"
-            requests.get(url = urlStr) 
-            return redirect(url_for('index'))
-        elif request.form['submit_button'] == 'startAtt2':
-            #return render_template('login.html')
-            msg = 'A;2'
-            crtClient.sendto(msg.encode('utf-8'), SEV_IP)
-            return redirect(url_for('index'))
-        elif request.form['submit_button'] == 'stopAtt1':
-            #return render_template('login.html')
-            msg = 'A;0'
-            crtClient.sendto(msg.encode('utf-8'), SEV_IP)
-            return redirect(url_for('index'))
-        elif request.form['submit_button'] == 'stopAtt2':
-            #return render_template('login.html')
-            msg = 'A;0'
-            crtClient.sendto(msg.encode('utf-8'), SEV_IP)
-            return redirect(url_for('index'))
-    elif request.method == 'GET':
-        return redirect('/index') 
 
 if __name__ == '__main__':
     app.run(host= "0.0.0.0", debug=False, threaded=True)

@@ -29,7 +29,7 @@ a:link {
 }
 
 a:visited{
-    color: ##A0A0A0
+    color: #A0A0A0
 }
 
 a:hover, a:active{
@@ -38,8 +38,8 @@ a:hover, a:active{
 
 #text {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 20%;
+    left: 20%;
     font-size: 10px;
     color: #A0A0A0;
     transform: translate(-50%, -50%);
@@ -50,8 +50,9 @@ a:hover, a:active{
     border: 2px solid black;
     background-color: #A0A0A0;
     color: black;
-    padding: 10px 20px;
-    font-size: 8px;
+    padding: 4px 8px;
+    font-size: 6px;
+    margin: 4px 2px;
     cursor: pointer;
 }
 

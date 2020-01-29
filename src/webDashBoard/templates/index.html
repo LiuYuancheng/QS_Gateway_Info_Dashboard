@@ -9,39 +9,41 @@
 </head>
 
 <body style="background-color: #212124;">
-<a href=# id=startAtt1><button class="btn success">Enable Encryption </button></a>&nbsp
-<a href=# id=stopAtt1><button class="btn info">Exchange Key</button></a>
-<a href=# id=stopAtt1><button class="btn danger">Disable Encryption</button></a>&nbsp
+<table>
+    <tr>
+        <td><a href=# id=enableEncrypt><button class="btn success">Enable Encryption </button></a></td>
+        <td>
+            <a href=# id=exchangeKey><button class="btn info">Exchange Key</button></a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href=# id=disableEncrypt><button class="btn danger">Disable Encryption</button></a>
+        </td>
+    </tr>
+</table>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type=text/javascript>
     $(function() {
-        // Start the black out attack.
-        $('a#startAtt1').bind('click', function() {
-        $.getJSON('/startAtt1',
+        // Enable encryption.
+        $('a#enableEncrypt').bind('click', function() {
+        $.getJSON('/enableEncrypt',
             function(data) {
             //do nothing
         });
         return false;
         });
-        // Stop the black out attack.
-        $('a#stopAtt1').bind('click', function() {
-        $.getJSON('/stopAtt1',
+        // Disable encryption
+        $('a#disableEncrypt').bind('click', function() {
+        $.getJSON('/disableEncrypt',
             function(data) {
             //do nothing
         });
         return false;
         });
-        // Start the false data injection attack.
-        $('a#startAtt2').bind('click', function() {
-        $.getJSON('/startAtt2',
-            function(data) {
-            //do nothing
-        });
-        return false;
-        });
-        // Stop the false data injection attack.
-        $('a#stopAtt2').bind('click', function() {
-        $.getJSON('/stopAtt2',
+        // exchange key
+        $('a#exchangeKey').bind('click', function() {
+        $.getJSON('/exchangeKey',
             function(data) {
             //do nothing
         });
