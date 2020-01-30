@@ -47,6 +47,7 @@ class gwWebClient(object):
         self.gwClient = udpCom.udpClient(SEV_IP)
         self.latency = 0.0001
         self.terminate = False
+        self.lineCounts = [0, 0]
         print("load the configure file and login.")
         self.dataDist = None
         with open(GW_CONFIG, "r") as fh:
@@ -86,13 +87,19 @@ class gwWebClient(object):
             print(self.latency)
 
 #-----------------------------------------------------------------------------
-    def loadJsonData(self, filePath):
+    def loadJsonData(self, filePath, lIdx=None):
         """ Load the Json file and return the Json object."""
         jsonRe = None
         with open(filePath, "r") as fh:
             lines = fh.readlines()
             idx = random.randint(0, len(lines)-1) if TEST_MODE else -1
             jsonRe = json.loads(lines[idx].rstrip())
+            if not (lIdx is None):
+                print(lIdx)
+                if self.lineCounts[lIdx]<len(lines):
+                    self.lineCounts[lIdx] = len(lines)
+                else:
+                    jsonRe = None
         return jsonRe
 
 #-----------------------------------------------------------------------------
@@ -112,16 +119,16 @@ class gwWebClient(object):
                                str(self.latency) ))
             self.gwClient.sendMsg(thrMsg, resp=False)
             # Check TLS information.
-            tlsDict = self.loadJsonData(TLS_CM_JSON)
-            if count % 20 == 0:
+            tlsDict = self.loadJsonData(TLS_CM_JSON, lIdx=0)
+            if tlsDict:
                 tlsMsg = ';'.join( ('T', tlsDict['Src_IP_address'], 
                     str(tlsDict["Dest_IP_address"]),
                     str(tlsDict["TLS_Version"]),
                     str(tlsDict["TLS_Cipher_Suite"]) ))
                 self.gwClient.sendMsg(tlsMsg, resp=False)
             # Check Key exchange information
-            keyDict = self.loadJsonData(KEY_EX_JSON)
-            if count % 20 == 0:
+            keyDict = self.loadJsonData(KEY_EX_JSON, lIdx=1)
+            if keyDict:
                 keyMsg = ';'.join( ('K', keyDict['keyVal'] ))
                 self.gwClient.sendMsg(keyMsg, resp=False)
             count += 1 

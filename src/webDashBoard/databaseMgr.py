@@ -224,7 +224,7 @@ class DataBaseMgr(object):
         self.gwDict[ipAddr[0]]['outTP'] = float(outTP)
         self.gwDict[ipAddr[0]]['encptPct'] = float(encptPct)
         print((float(latency), self.latency))
-        self.gwDict[ipAddr[0]]['latency'] = abs(float(latency)-self.latency)/2.0
+        self.gwDict[ipAddr[0]]['latency'] = abs(float(latency)-self.latency)/2000.0
 
 #-----------------------------------------------------------------------------
     def updateTls(self, msgList=None, ipAddr=None):
