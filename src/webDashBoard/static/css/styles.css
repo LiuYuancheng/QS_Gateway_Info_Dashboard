@@ -9,6 +9,12 @@ h1 {
     word-break: break-all;
 }
 
+h5 {
+    font-size: 12px;
+    color: #A0A0A0;
+    word-break: break-all;
+}
+
 form {
     display: inline;
 }
@@ -69,13 +75,13 @@ a:hover, a:active{
 
 /* Blue */
 .info {
-    border-color: #2196F3;
-    color: dodgerblue;
+    border-color: #A0A0A0;
+    color: rgb(8, 8, 8);
 }
 
 .info:hover {
-    background: #2196F3;
-    color:#A0A0A0;
+    background: #A0A0A0;
+    color: rgb(8, 8, 8);
 }
 
 /* Orange */
