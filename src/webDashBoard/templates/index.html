@@ -14,17 +14,16 @@
         <!--<td><a href=# id=enableEncrypt><button class="btn success">Enable Encryption </button></a></td>
         <td><a href=# id=disableEncrypt><button class="btn danger">Disable Encryption</button></a></td>
         -->
-        <td colspan="2">
+        <td >
             <img src="../static/images/logoSingtel.png" alt="Girl in a jacket" style="width:160px;height:40px;">
         </td>
         
-        <td> </td>
         <td>
-            <font color=#A0A0A0> <strong> Control Panel : </strong></font>
+            <font color=#A0A0A0> <strong>Control Panel </strong></font>
         </td>
         <td> </td>
         <td>
-            <input type="checkbox" id="myCheck"  onclick="cbFunction()"> <font color=#A0A0A0> Enable Gateway Encryption </font>
+            <input type="checkbox" id="myCheck"  onclick="cbFunction()" checked> <font color=#A0A0A0> Enable Gateway Encryption </font>
         </td>
 
         <td>
@@ -33,6 +32,7 @@
     </tr>
 
 </table>
+<p id="text" style="display:none">Checkbox is CHECKED!</p>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type=text/javascript>
     $(function() {
